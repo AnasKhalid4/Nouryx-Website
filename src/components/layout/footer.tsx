@@ -4,7 +4,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { Facebook, Twitter, Linkedin, Instagram } from "lucide-react";
 import { useLocale } from "@/hooks/use-locale";
-// This is the footer section 
+// This is the footer section and add section 
 const socialIcons = [
   { name: "Facebook", icon: Facebook, href: "#" },
   { name: "Twitter", icon: Twitter, href: "#" },
