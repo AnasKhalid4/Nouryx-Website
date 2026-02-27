@@ -28,7 +28,6 @@ const Building  = ({ size = 14, style }: IconProps) => <svg width={size} height=
 const Check     = ({ size = 12, style }: IconProps) => <svg width={size} height={size} style={style} fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>;
 const Globe     = ({ size = 13, style }: IconProps) => <svg width={size} height={size} style={style} fill="none" stroke="currentColor" strokeWidth={1.8} viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 010 20M12 2a15.3 15.3 0 000 20"/></svg>;
 
-// ─── Input ────────────────────────────────────────────────────────────────────
 interface InputFieldProps {
   icon?: React.ComponentType<IconProps>;
   type?: string;
@@ -84,7 +83,7 @@ function UploadZone({ round = false, label, Icon = Upload }: { round?: boolean; 
         onMouseEnter={(e) => { e.currentTarget.style.borderColor = COLORS.accent; }}
         onMouseLeave={(e) => { e.currentTarget.style.borderColor = `${COLORS.accent}50`; }}>
         <Icon size={16} style={{ color: `${COLORS.accent}90` }} />
-        <span style={{ fontSize: 9.5, color: "#9CA3AF", marginTop: 4,  letterSpacing: "0.05em" }}>{label}</span>
+        <span style={{ fontSize: 9.5, color: "#9CA3AF", marginTop: 4, letterSpacing: "0.05em" }}>{label}</span>
       </div>
       <input type="file" style={{ display: "none" }} accept="image/*" />
     </label>
@@ -93,7 +92,7 @@ function UploadZone({ round = false, label, Icon = Upload }: { round?: boolean; 
 
 function StepIndicator({ step }: { step: number }) {
   return (
-    <div style={{ display: "flex", alignItems: "center", marginBottom: 4 ,width: "80%" }}>
+    <div style={{ display: "flex", alignItems: "center", marginBottom: 4, width: "80%" }}>
       {[1, 2].map((s, i) => (
         <React.Fragment key={s}>
           <div style={{ display: "flex", alignItems: "center", gap: 7 }}>
@@ -113,7 +112,7 @@ function StepIndicator({ step }: { step: number }) {
 
 function AppSelect({ options, placeholder }: { options: string[]; placeholder: string }) {
   return (
-    <select style={{ width: "100%", height: 44, borderRadius: 10, border: "1.5px solid #E5E7EB", background: "#FAFAF9", padding: "0 36px 0 13px", fontSize: 14, color: "#1C1917",  cursor: "pointer", outline: "none", appearance: "none" as const, backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='11' height='11' viewBox='0 0 24 24' fill='none' stroke='%239CA3AF' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E")`, backgroundRepeat: "no-repeat", backgroundPosition: "right 13px center", boxSizing: "border-box" }}>
+    <select style={{ width: "100%", height: 44, borderRadius: 10, border: "1.5px solid #E5E7EB", background: "#FAFAF9", padding: "0 36px 0 13px", fontSize: 14, color: "#1C1917", cursor: "pointer", outline: "none", appearance: "none" as const, backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='11' height='11' viewBox='0 0 24 24' fill='none' stroke='%239CA3AF' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E")`, backgroundRepeat: "no-repeat", backgroundPosition: "right 13px center", boxSizing: "border-box" }}>
       <option value="">{placeholder}</option>
       {options.map((o) => <option key={o} value={o}>{o}</option>)}
     </select>
@@ -122,7 +121,8 @@ function AppSelect({ options, placeholder }: { options: string[]; placeholder: s
 
 function Panel({ active, children }: { active: boolean; children: React.ReactNode }) {
   return (
-    <div style={{ position: "absolute", inset: 0, overflowY: "auto", overflowX: "hidden", transform: active ? "translateX(0)" : "translateX(100%)", opacity: active ? 1 : 0, transition: "transform 0.45s cubic-bezier(.77,0,.18,1), opacity 0.3s ease", pointerEvents: active ? "auto" : "none", padding: "28px 52px 44px" }}>
+    <div style={{ position: "absolute", inset: 0, overflowY: "auto", overflowX: "hidden", transform: active ? "translateX(0)" : "translateX(100%)", opacity: active ? 1 : 0, transition: "transform 0.45s cubic-bezier(.77,0,.18,1), opacity 0.3s ease", pointerEvents: active ? "auto" : "none", padding: "28px 52px 44px" }}
+      className="panel-scroll">
       {children}
     </div>
   );
@@ -132,7 +132,7 @@ function NavBack({ label, onClick }: { label: string; onClick: () => void }) {
   const [hov, setHov] = useState(false);
   return (
     <button onClick={onClick} onMouseEnter={() => setHov(true)} onMouseLeave={() => setHov(false)}
-      style={{ display: "flex", alignItems: "center", gap: 6, background: hov ? "#F5F0EB" : "transparent", border: "none", cursor: "pointer", color: hov ? "#1C1917" : "#78716C", fontSize: 12, fontWeight: 500, letterSpacing: "0.04em", padding: "6px 10px", borderRadius: 8, transition: "all 0.2s" }}>
+      style={{ display: "flex", alignItems: "center", gap: 6, background: hov ? "#F5F0EB" : "transparent", border: "none", cursor: "pointer", color: hov ? "#1C1917" : "#78716C", fontSize: 12, fontWeight: 500, letterSpacing: "0.04em", padding: "6px 10px", borderRadius: 8, transition: "all 0.2s", whiteSpace: "nowrap" }}>
       <ArrowLeft size={13} />{label}
     </button>
   );
@@ -144,11 +144,10 @@ const RIGHT_COPY: Record<Screen, { quote: string; sub: string }> = {
   salon:  { quote: "Grow your salon business.",          sub: "Smart bookings. Happy clients. Less stress." },
 };
 
-// ─── PAGE ─────────────────────────────────────────────────────────────────────
 export default function SignupPage() {
-  const [screen, setScreen]       = useState<Screen>("select");
-  const [salonStep, setSalonStep] = useState(1);
-  const [showPw, setShowPw]       = useState(false);
+  const [screen, setScreen]         = useState<Screen>("select");
+  const [salonStep, setSalonStep]   = useState(1);
+  const [showPw, setShowPw]         = useState(false);
   const [autoAccept, setAutoAccept] = useState(false);
 
   const rp    = RIGHT_COPY[screen];
@@ -166,57 +165,150 @@ export default function SignupPage() {
         textarea { resize: none; }
         .role-card { transition: border-color 0.22s, background 0.22s, transform 0.22s, box-shadow 0.22s !important; }
         .role-card:hover { border-color: ${COLORS.accent} !important; background: ${COLORS.accentLight} !important; transform: translateY(-1px) !important; box-shadow: 0 4px 16px rgba(201,170,139,0.14) !important; }
+
+        /* ── Layout ── */
+        .signup-root {
+          display: flex;
+          height: 100vh;
+          width: 100vw;
+          overflow: hidden;
+          background: #FAFAF9;
+        }
+
+        /* LEFT — desktop (unchanged) */
+        .signup-left {
+          width: 50%;
+          min-width: 460px;
+          display: flex;
+          flex-direction: column;
+          height: 100vh;
+          overflow: hidden;
+        }
+
+        .signup-topbar {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          padding: 16px 52px;
+          border-bottom: 1px solid #F0EDE9;
+          flex-shrink: 0;
+        }
+
+        /* SELECT panel (not using Panel component) */
+        .select-panel {
+          position: absolute;
+          inset: 0;
+          display: flex;
+          flex-direction: column;
+          justify-content: center;
+          padding: 0 52px;
+        }
+
+        /* Panel scroll area — desktop padding */
+        .panel-scroll {
+          padding: 28px 52px 44px !important;
+        }
+
+        /* RIGHT — desktop (unchanged) */
+        .signup-right {
+          flex: 1;
+          height: 100vh;
+          position: relative;
+          overflow: hidden;
+          background: #1C1917;
+        }
+
+        /* ── Mobile ── */
+        @media (max-width: 767px) {
+          .signup-root {
+            height: 100svh;
+            overflow-y: auto;
+          }
+
+          /* Hide image entirely */
+          .signup-right {
+            display: none;
+          }
+
+          /* Left takes full width, centers content */
+          .signup-left {
+            width: 100%;
+            min-width: unset;
+            height: 100%;
+            min-height: 100svh;
+            align-items: center;
+          }
+
+          .signup-topbar {
+            width: 100%;
+            padding: 16px 24px;
+          }
+
+          /* Panels fill width and center */
+          .select-panel {
+            padding: 0 24px !important;
+            align-items: center;
+          }
+
+          .panel-scroll {
+            padding: 28px 24px 44px !important;
+          }
+        }
       `}</style>
 
-      <div style={{ display: "flex", height: "100vh", width: "100vw", overflow: "hidden", background: "#FAFAF9" }}>
+      <div className="signup-root">
 
         {/* LEFT */}
-        <div style={{ width: "50%", minWidth: 460, display: "flex", flexDirection: "column", height: "100vh", overflow: "hidden" }}>
+        <div className="signup-left">
 
           {/* Top bar */}
-          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "16px 52px", borderBottom: "1px solid #F0EDE9", flexShrink: 0 }}>
+          <div className="signup-topbar">
             <div style={{ display: "flex", alignItems: "center", gap: 9 }}>
-            
-  <img
-              src="/images/website-logo.png"
-              alt="Nouryx"
-              className="h-7 w-auto"
-            />            </div>
-            {/* Always-visible back/home button */}
+              <img src="/images/website-logo.png" alt="Nouryx" className="h-7 w-auto" />
+            </div>
             <NavBack label={screen !== "select" ? "Back" : "Home"} onClick={onBack} />
           </div>
 
           {/* Panels */}
-          <div style={{ flex: 1, overflow: "hidden", position: "relative" }}>
+          <div style={{ flex: 1, overflow: "hidden", position: "relative", width: "100%" }}>
 
             {/* SELECT */}
-            <div style={{ position: "absolute", inset: 0, display: "flex", flexDirection: "column", justifyContent: "center", padding: "0 52px", transform: screen === "select" ? "translateX(0)" : "translateX(-100%)", opacity: screen === "select" ? 1 : 0, transition: "transform 0.45s cubic-bezier(.77,0,.18,1), opacity 0.3s ease", pointerEvents: screen === "select" ? "auto" : "none" }}>
-              <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.16em", textTransform: "uppercase" as const, color: COLORS.accent,  marginBottom: 10 }}>Welcome to Nouryx</p>
-              <h1 style={{ fontSize: 36, fontWeight: 600, color: "#1C1917", lineHeight: 1.18, marginBottom: 6 }}>Sign up</h1>
-              <p style={{ color: "#A8A29E", fontSize: 15.5, marginBottom: 36, fontWeight: 300 }}>Choose how you'd like to continue.</p>
+            <div
+              className="select-panel"
+              style={{
+                transform: screen === "select" ? "translateX(0)" : "translateX(-100%)",
+                opacity: screen === "select" ? 1 : 0,
+                transition: "transform 0.45s cubic-bezier(.77,0,.18,1), opacity 0.3s ease",
+                pointerEvents: screen === "select" ? "auto" : "none",
+              }}>
+              <div style={{ width: "100%", maxWidth: 420 }}>
+                <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.16em", textTransform: "uppercase" as const, color: COLORS.accent, marginBottom: 10 }}>Welcome to Nouryx</p>
+                <h1 style={{ fontSize: 36, fontWeight: 600, color: "#1C1917", lineHeight: 1.18, marginBottom: 6 }}>Sign up</h1>
+                <p style={{ color: "#A8A29E", fontSize: 15.5, marginBottom: 36, fontWeight: 300 }}>Choose how you'd like to continue.</p>
 
-              <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-                {([
-                  { key: "client" as Screen, title: "For Customers",     sub: "Book salons and spas near you",   symbol: "✦" },
-                  { key: "salon"  as Screen, title: "For Professionals",  sub: "Manage and grow your business",   symbol: "◈" },
-                ]).map(({ key, title, sub, symbol }) => (
-                  <button key={key} className="role-card" onClick={() => goTo(key)}
-                    style={{ display: "flex", alignItems: "center", gap: 14, padding: "16px 18px", borderRadius: 12, border: "1.5px solid #E5E7EB", background: "#fff", cursor: "pointer", textAlign: "left", boxShadow: "0 1px 4px rgba(0,0,0,0.04)" }}>
-                    <div style={{ height: 40, width: 40, borderRadius: 10, background: COLORS.accentLight, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 17, flexShrink: 0, color: COLORS.accent }}>{symbol}</div>
-                    <div style={{ flex: 1 }}>
-                      <div style={{ fontSize: 16, fontWeight: 600, color: "#1C1917", marginBottom: 1 }}>{title}</div>
-                      <div style={{ fontSize: 13, color: "#A8A29E", fontWeight: 300 }}>{sub}</div>
-                    </div>
-                    <div style={{ color: "#D6CFC9", flexShrink: 0, display: "flex" }}><ArrowRight size={13} /></div>
-                  </button>
-                ))}
-              </div>
+                <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+                  {([
+                    { key: "client" as Screen, title: "For Customers",    sub: "Book salons and spas near you",  symbol: "✦" },
+                    { key: "salon"  as Screen, title: "For Professionals", sub: "Manage and grow your business",  symbol: "◈" },
+                  ]).map(({ key, title, sub, symbol }) => (
+                    <button key={key} className="role-card" onClick={() => goTo(key)}
+                      style={{ display: "flex", alignItems: "center", gap: 14, padding: "16px 18px", borderRadius: 12, border: "1.5px solid #E5E7EB", background: "#fff", cursor: "pointer", textAlign: "left", boxShadow: "0 1px 4px rgba(0,0,0,0.04)", width: "100%" }}>
+                      <div style={{ height: 40, width: 40, borderRadius: 10, background: COLORS.accentLight, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 17, flexShrink: 0, color: COLORS.accent }}>{symbol}</div>
+                      <div style={{ flex: 1 }}>
+                        <div style={{ fontSize: 16, fontWeight: 600, color: "#1C1917", marginBottom: 1 }}>{title}</div>
+                        <div style={{ fontSize: 13, color: "#A8A29E", fontWeight: 300 }}>{sub}</div>
+                      </div>
+                      <div style={{ color: "#D6CFC9", flexShrink: 0, display: "flex" }}><ArrowRight size={13} /></div>
+                    </button>
+                  ))}
+                </div>
 
-              <p style={{ marginTop: 28, fontSize: 13.5, color: "#A8A29E", textAlign: "center" }}>
-                Already have an account?{" "}<Link href="/login" style={{ color: COLORS.accent, fontWeight: 600, textDecoration: "none" }}>Sign in</Link>
-              </p>
-              <div style={{ marginTop: 36, display: "flex", gap: 20, justifyContent: "center" }}>
-                <button style={{ display: "flex", alignItems: "center", gap: 5, background: "none", border: "none", cursor: "pointer", color: "#A8A29E", fontSize: 12,  padding: 0 }}><Globe size={12} /> Help &amp; Support</button>
+                <p style={{ marginTop: 28, fontSize: 13.5, color: "#A8A29E", textAlign: "center" }}>
+                  Already have an account?{" "}<Link href="/login" style={{ color: COLORS.accent, fontWeight: 600, textDecoration: "none" }}>Sign in</Link>
+                </p>
+                <div style={{ marginTop: 36, display: "flex", gap: 20, justifyContent: "center" }}>
+                  <button style={{ display: "flex", alignItems: "center", gap: 5, background: "none", border: "none", cursor: "pointer", color: "#A8A29E", fontSize: 12, padding: 0 }}><Globe size={12} /> Help &amp; Support</button>
+                </div>
               </div>
             </div>
 
@@ -245,7 +337,7 @@ export default function SignupPage() {
             {/* SALON FORM */}
             <Panel active={screen === "salon"}>
               <div style={{ marginBottom: 18 }}>
-                <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.15em", color: COLORS.accent,  textTransform: "uppercase" as const, marginBottom: 7 }}>Professional Account</p>
+                <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.15em", color: COLORS.accent, textTransform: "uppercase" as const, marginBottom: 7 }}>Professional Account</p>
                 <h2 style={{ fontSize: 28, fontWeight: 600, color: "#1C1917", lineHeight: 1.2 }}>Register your salon</h2>
               </div>
               <StepIndicator step={salonStep} />
@@ -316,14 +408,14 @@ export default function SignupPage() {
           </div>
         </div>
 
-        {/* RIGHT */}
-        <div style={{ flex: 1, height: "100vh", position: "relative", overflow: "hidden", background: "#1C1917" }}>
+        {/* RIGHT — image panel, hidden on mobile */}
+        <div className="signup-right">
           <div style={{ position: "absolute", inset: 0, backgroundImage: `url('https://images.unsplash.com/photo-1560066984-138dadb4c035?w=1200&q=80')`, backgroundSize: "cover", backgroundPosition: "center" }} />
           <div style={{ position: "absolute", inset: 0, background: "linear-gradient(160deg, rgba(28,25,23,0.5) 0%, rgba(201,170,139,0.1) 55%, rgba(28,25,23,0.72) 100%)" }} />
-          <div style={{ position: "absolute", top: 24, right: 24, background: "rgba(255,255,255,0.1)", backdropFilter: "blur(14px)", borderRadius: 10, padding: "8px 16px", color: "#fff", fontSize: 12.5,  fontWeight: 600, letterSpacing: "0.05em", border: "1px solid rgba(255,255,255,0.15)" }}>✦ nouryx.</div>
+          <div style={{ position: "absolute", top: 24, right: 24, background: "rgba(255,255,255,0.1)", backdropFilter: "blur(14px)", borderRadius: 10, padding: "8px 16px", color: "#fff", fontSize: 12.5, fontWeight: 600, letterSpacing: "0.05em", border: "1px solid rgba(255,255,255,0.15)" }}>✦ nouryx.</div>
           <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, padding: "40px 48px" }}>
             <div style={{ width: 36, height: 2, background: COLORS.accent, marginBottom: 18, borderRadius: 2 }} />
-            <div style={{ fontSize: 32, fontWeight: 500, color: "#fff", lineHeight: 1.28, marginBottom: 8, textShadow: "0 2px 20px rgba(0,0,0,0.3)", }}>{rp.quote}</div>
+            <div style={{ fontSize: 32, fontWeight: 500, color: "#fff", lineHeight: 1.28, marginBottom: 8, textShadow: "0 2px 20px rgba(0,0,0,0.3)" }}>{rp.quote}</div>
             <p style={{ color: "rgba(255,255,255,0.6)", fontSize: 14.5, fontWeight: 300 }}>{rp.sub}</p>
             <div style={{ display: "flex", gap: 5, marginTop: 22 }}>
               {(["select", "client", "salon"] as Screen[]).map((s) => (
@@ -332,6 +424,7 @@ export default function SignupPage() {
             </div>
           </div>
         </div>
+
       </div>
     </>
   );

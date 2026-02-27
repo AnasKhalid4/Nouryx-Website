@@ -41,8 +41,7 @@ export default function AboutPage() {
           <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
 
             {/* Left — overlapping image collage */}
-            <div className="relative h-[520px] flex-shrink-0">
-              {/* Back image: tall portrait */}
+<div className="relative h-[520px] flex-shrink-0 hidden md:block">              {/* Back image: tall portrait */}
               <div className="absolute top-0 left-0 w-[56%] h-[64%] rounded-2xl overflow-hidden">
                 <img
                   src="/images/salon-placeholder-5.webp"

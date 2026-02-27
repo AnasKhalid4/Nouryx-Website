@@ -23,7 +23,7 @@ function AppInput({ icon: Icon, type = "text", placeholder, rightIcon, onRightIc
       {Icon && <span style={{ position: "absolute", left: 13, color: "#9CA3AF", display: "flex", pointerEvents: "none" }}><Icon size={14} /></span>}
       <input
         type={type} placeholder={placeholder}
-        style={{ width: "100%", height: 46, borderRadius: 10, border: "1.5px solid #E5E7EB", background: "#FAFAF9", padding: Icon ? "0 38px 0 40px" : "0 13px", fontSize: 14, color: "#1C1917", outline: "none", transition: "border-color 0.2s, box-shadow 0.2s",  letterSpacing: "0.01em", boxSizing: "border-box" }}
+        style={{ width: "100%", height: 46, borderRadius: 10, border: "1.5px solid #E5E7EB", background: "#FAFAF9", padding: Icon ? "0 38px 0 40px" : "0 13px", fontSize: 14, color: "#1C1917", outline: "none", transition: "border-color 0.2s, box-shadow 0.2s", letterSpacing: "0.01em", boxSizing: "border-box" }}
         onFocus={(e) => { e.currentTarget.style.borderColor = COLORS.accent; e.currentTarget.style.boxShadow = `0 0 0 3px ${COLORS.accentLight}`; }}
         onBlur={(e)  => { e.currentTarget.style.borderColor = "#E5E7EB"; e.currentTarget.style.boxShadow = "none"; }}
       />
@@ -33,7 +33,7 @@ function AppInput({ icon: Icon, type = "text", placeholder, rightIcon, onRightIc
 }
 
 function FieldLabel({ children }: { children: React.ReactNode }) {
-  return <label style={{ display: "block", marginBottom: 5, fontSize: 11, fontWeight: 700, color: "#57534E", letterSpacing: "0.08em", textTransform: "uppercase" as const}}>{children}</label>;
+  return <label style={{ display: "block", marginBottom: 5, fontSize: 11, fontWeight: 700, color: "#57534E", letterSpacing: "0.08em", textTransform: "uppercase" as const }}>{children}</label>;
 }
 
 export default function LoginPage() {
@@ -49,40 +49,129 @@ export default function LoginPage() {
         ::-webkit-scrollbar { width: 3px; }
         ::-webkit-scrollbar-thumb { background: ${COLORS.accent}44; border-radius: 4px; }
         input::placeholder { color: #C4B9B4; font-family: 'Cormorant Garamond', serif; }
+
+        /* ── Responsive layout ── */
+        .login-root {
+          display: flex;
+          height: 100vh;
+          width: 100vw;
+          overflow: hidden;
+          background: #FAFAF9;
+        }
+
+        /* LEFT panel — exact original */
+        .login-left {
+          width: 50%;
+          min-width: 440px;
+          display: flex;
+          flex-direction: column;
+          height: 100vh;
+          overflow: hidden;
+        }
+
+        .login-topbar {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          padding: 16px 52px;
+          border-bottom: 1px solid #F0EDE9;
+          flex-shrink: 0;
+        }
+
+        .login-form-area {
+          flex: 1;
+          display: flex;
+          flex-direction: column;
+          justify-content: center;
+          padding: 0 52px;
+          overflow-y: auto;
+        }
+
+        .login-form-inner {
+          max-width: 380px;
+          width: 100%;
+        }
+
+        /* RIGHT panel — exact original */
+        .login-right {
+          flex: 1;
+          height: 100vh;
+          position: relative;
+          overflow: hidden;
+          background: #1C1917;
+        }
+
+        /* ── Mobile: hide image, center form ── */
+        @media (max-width: 767px) {
+          .login-root {
+            height: 100svh;
+            overflow-y: auto;
+          }
+
+          .login-right {
+            display: none;
+          }
+
+          .login-left {
+            width: 100%;
+            min-width: unset;
+            height: 100%;
+            min-height: 100svh;
+            align-items: center;
+          }
+
+          .login-topbar {
+            width: 100%;
+            padding: 16px 24px;
+          }
+
+          .login-form-area {
+            width: 100%;
+            padding: 0 24px 40px;
+            align-items: center;
+          }
+
+          .login-form-inner {
+            max-width: 400px;
+            width: 100%;
+          }
+        }
       `}</style>
 
-      <div style={{ display: "flex", height: "100vh", width: "100vw",  overflow: "hidden", background: "#FAFAF9" }}>
+      <div className="login-root">
 
-        {/* LEFT */}
-        <div style={{ width: "50%", minWidth: 440, display: "flex", flexDirection: "column", height: "100vh", overflow: "hidden" }}>
+    
+        {/* LEFT — form */}
+        <div className="login-left">
 
           {/* Top bar */}
-          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "16px 52px", borderBottom: "1px solid #F0EDE9", flexShrink: 0 }}>
+          <div className="login-topbar">
             <div style={{ display: "flex", alignItems: "center", gap: 9 }}>
-              <div style={{ height: 34, width: 34, borderRadius: "50%", background: COLORS.accent, display: "flex", alignItems: "center", justifyContent: "center" }}>
+              <div style={{ height: 34, width: 34, borderRadius: "50%", background: COLORS.accent, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
                 <span style={{ color: "#fff", fontWeight: 700, fontSize: 17, lineHeight: 1 }}>N</span>
               </div>
               <span style={{ fontWeight: 600, fontSize: 19, color: "#1C1917", letterSpacing: "0.02em" }}>nouryx.</span>
             </div>
+
             {/* Back to Home */}
             <button
               onClick={() => window.location.href = "/"}
               onMouseEnter={() => setHovBack(true)}
               onMouseLeave={() => setHovBack(false)}
-              style={{ display: "flex", alignItems: "center", gap: 6, background: hovBack ? "#F5F0EB" : "transparent", border: "none", cursor: "pointer", color: hovBack ? "#1C1917" : "#78716C", fontSize: 12, fontWeight: 500, letterSpacing: "0.04em", padding: "6px 10px", borderRadius: 8, transition: "all 0.2s" }}>
+              style={{ display: "flex", alignItems: "center", gap: 6, background: hovBack ? "#F5F0EB" : "transparent", border: "none", cursor: "pointer", color: hovBack ? "#1C1917" : "#78716C", fontSize: 12, fontWeight: 500, letterSpacing: "0.04em", padding: "6px 10px", borderRadius: 8, transition: "all 0.2s", whiteSpace: "nowrap" }}>
               <ArrowLeft size={13} /> Home
             </button>
           </div>
 
           {/* Form area */}
-          <div style={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "center", padding: "0 52px", overflowY: "auto" }}>
-            <div style={{ maxWidth: 380, width: "100%" }}>
+          <div className="login-form-area">
+            <div className="login-form-inner">
 
-              <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.16em", textTransform: "uppercase" as const, color: COLORS.accent,  marginBottom: 10 }}>Welcome back</p>
-              <h1 style={{ fontSize: 36, fontWeight: 600, color: "#1C1917", lineHeight: 1.18, marginBottom: 6, }}>
-                Sign <em style={{ fontWeight: 300 }}>in</em>
+              <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.16em", textTransform: "uppercase", color: COLORS.accent, marginBottom: 10 }}>Welcome back</p>
+              <h1 style={{ fontSize: 36, fontWeight: 600, color: "#1C1917", lineHeight: 1.18, marginBottom: 6 }}>
+                Sign in
               </h1>
-              <p style={{ color: "#A8A29E", fontSize: 15, marginBottom: 36, fontWeight: 300 }}>
+              <p style={{ color: "#A8A29E", fontSize: 15, marginBottom: 32, fontWeight: 300 }}>
                 Good to have you back. Let&apos;s get started.
               </p>
 
@@ -95,7 +184,7 @@ export default function LoginPage() {
                 <div>
                   <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 5 }}>
                     <FieldLabel>Password</FieldLabel>
-                    <Link href="/forgot-password" style={{ fontSize: 11.5, color: COLORS.accent, fontWeight: 600, textDecoration: "none",  letterSpacing: "0.02em" }}>
+                    <Link href="/forgot-password" style={{ fontSize: 11.5, color: COLORS.accent, fontWeight: 600, textDecoration: "none", letterSpacing: "0.02em" }}>
                       Forgot password?
                     </Link>
                   </div>
@@ -106,45 +195,41 @@ export default function LoginPage() {
                   />
                 </div>
 
-         
                 <button
                   type="submit"
                   onMouseEnter={() => setHovBtn(true)}
                   onMouseLeave={() => setHovBtn(false)}
-                  style={{ width: "100%", height: 46, borderRadius: 10, background: hovBtn ? COLORS.accentDark : COLORS.accent, color: "#fff", border: "none", cursor: "pointer", fontSize: 12, fontWeight: 700, letterSpacing: "0.1em", transition: "background 0.2s, transform 0.15s", transform: hovBtn ? "translateY(-1px)" : "none", marginTop: 4 }}>
+                  style={{ width: "100%", height: 48, borderRadius: 10, background: hovBtn ? COLORS.accentDark : COLORS.accent, color: "#fff", border: "none", cursor: "pointer", fontSize: 12, fontWeight: 700, letterSpacing: "0.1em", transition: "background 0.2s, transform 0.15s", transform: hovBtn ? "translateY(-1px)" : "none", marginTop: 4 }}>
                   SIGN IN
                 </button>
               </form>
-
-            
-
 
               <p style={{ marginTop: 28, fontSize: 13.5, color: "#A8A29E", textAlign: "center" }}>
                 Don&apos;t have an account?{" "}
                 <Link href="/signup" style={{ color: COLORS.accent, fontWeight: 600, textDecoration: "none" }}>Sign up</Link>
               </p>
+
             </div>
           </div>
         </div>
-
-        {/* RIGHT — full height image */}
-        <div style={{ flex: 1, height: "100vh", position: "relative", overflow: "hidden", background: "#1C1917" }}>
+    {/* RIGHT — hero image (rendered first in DOM so mobile order: -1 works) */}
+        <div className="login-right">
           <div style={{ position: "absolute", inset: 0, backgroundImage: `url('https://images.unsplash.com/photo-1521590832167-7bcbfaa6381f?w=1200&q=80')`, backgroundSize: "cover", backgroundPosition: "center" }} />
           <div style={{ position: "absolute", inset: 0, background: "linear-gradient(160deg, rgba(28,25,23,0.45) 0%, rgba(201,170,139,0.08) 55%, rgba(28,25,23,0.75) 100%)" }} />
+
           {/* Badge */}
-          <div style={{ position: "absolute", top: 24, right: 24, background: "rgba(255,255,255,0.1)", backdropFilter: "blur(14px)", borderRadius: 10, padding: "8px 16px", color: "#fff", fontSize: 12.5,  fontWeight: 600, letterSpacing: "0.05em", border: "1px solid rgba(255,255,255,0.15)" }}>
+          <div style={{ position: "absolute", top: 20, right: 20, background: "rgba(255,255,255,0.1)", backdropFilter: "blur(14px)", borderRadius: 10, padding: "7px 14px", color: "#fff", fontSize: 12.5, fontWeight: 600, letterSpacing: "0.05em", border: "1px solid rgba(255,255,255,0.15)", zIndex: 2 }}>
             ✦ nouryx.
           </div>
-        
-         
-          {/* Bottom copy */}
-          <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, padding: "40px 48px" }}>
+
+          {/* Bottom copy — hidden on mobile via CSS */}
+          <div className="login-right-copy" style={{ position: "absolute", bottom: 0, left: 0, right: 0, padding: "40px 48px" }}>
             <div style={{ width: 36, height: 2, background: COLORS.accent, marginBottom: 18, borderRadius: 2 }} />
             <div style={{ fontSize: 32, fontWeight: 500, color: "#fff", lineHeight: 1.28, marginBottom: 8, textShadow: "0 2px 20px rgba(0,0,0,0.3)" }}>
               Your appointments,<br />always on time.
             </div>
             <p style={{ color: "rgba(255,255,255,0.6)", fontSize: 14.5, fontWeight: 300 }}>
-              Manage bookings & discover top salons near you.
+              Manage bookings &amp; discover top salons near you.
             </p>
           </div>
         </div>
