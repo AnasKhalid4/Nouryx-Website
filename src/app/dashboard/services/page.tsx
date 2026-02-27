@@ -28,29 +28,29 @@ export default function DashboardServicesPage() {
   );
 
   return (
-    <div className="p-6 lg:p-10 max-w-7xl mx-auto w-full">
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold text-foreground">{t.dashboard.services.title}</h1>
+    <div className="p-4 md:p-6 lg:p-10 max-w-7xl mx-auto w-full">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-4 md:mb-6 gap-3">
+        <h1 className="text-xl md:text-2xl font-bold text-foreground">{t.dashboard.services.title}</h1>
         <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
           <DialogTrigger asChild>
-            <Button className="bg-[#C9AA8B] hover:bg-[#B8956F] text-white rounded-lg gap-1.5 text-sm">
+            <Button className="w-full sm:w-auto bg-[#C9AA8B] hover:bg-[#B8956F] text-white rounded-lg gap-1.5 text-sm h-10">
               <Plus className="h-4 w-4" />
               {t.dashboard.services.addService}
             </Button>
           </DialogTrigger>
-          <DialogContent className="sm:max-w-md">
+          <DialogContent className="sm:max-w-md w-[95vw] rounded-xl max-h-[90vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle>{t.dashboard.services.addService}</DialogTitle>
             </DialogHeader>
             <form className="space-y-4 mt-2" onSubmit={(e) => { e.preventDefault(); setDialogOpen(false); }}>
               <div className="space-y-2">
                 <Label className="text-sm">{t.dashboard.services.name}</Label>
-                <Input placeholder="e.g. Women's Haircut" className="h-10 rounded-lg" />
+                <Input placeholder="e.g. Women's Haircut" className="h-10 rounded-lg text-base sm:text-sm" />
               </div>
               <div className="space-y-2">
                 <Label className="text-sm">{t.dashboard.services.category}</Label>
                 <Select>
-                  <SelectTrigger className="h-10 rounded-lg">
+                  <SelectTrigger className="h-10 rounded-lg text-base sm:text-sm">
                     <SelectValue placeholder="Select category" />
                   </SelectTrigger>
                   <SelectContent>
@@ -63,7 +63,7 @@ export default function DashboardServicesPage() {
               <div className="space-y-2">
                 <Label className="text-sm">{t.dashboard.services.duration}</Label>
                 <Select>
-                  <SelectTrigger className="h-10 rounded-lg">
+                  <SelectTrigger className="h-10 rounded-lg text-base sm:text-sm">
                     <SelectValue placeholder="Select duration" />
                   </SelectTrigger>
                   <SelectContent>
@@ -75,13 +75,13 @@ export default function DashboardServicesPage() {
               </div>
               <div className="space-y-2">
                 <Label className="text-sm">{t.dashboard.services.price} (€)</Label>
-                <Input type="number" placeholder="45" className="h-10 rounded-lg" />
+                <Input type="number" placeholder="45" className="h-10 rounded-lg text-base sm:text-sm" />
               </div>
-              <div className="flex gap-3 pt-2">
-                <Button type="button" variant="outline" onClick={() => setDialogOpen(false)} className="flex-1 rounded-lg">
+              <div className="flex flex-col sm:flex-row gap-3 pt-2">
+                <Button type="button" variant="outline" onClick={() => setDialogOpen(false)} className="w-full sm:flex-1 rounded-lg h-10">
                   {t.common.cancel}
                 </Button>
-                <Button type="submit" className="flex-1 bg-[#C9AA8B] hover:bg-[#B8956F] text-white rounded-lg">
+                <Button type="submit" className="w-full sm:flex-1 bg-[#C9AA8B] hover:bg-[#B8956F] text-white rounded-lg h-10">
                   {t.dashboard.services.save}
                 </Button>
               </div>
@@ -93,20 +93,20 @@ export default function DashboardServicesPage() {
       <div className="space-y-6">
         {Object.entries(grouped).map(([catName, services]) => (
           <div key={catName}>
-            <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide mb-3">
+            <h2 className="text-xs md:text-sm font-semibold text-muted-foreground uppercase tracking-wide mb-2 md:mb-3">
               {catName}
             </h2>
             <div className="space-y-2">
               {services.map((service) => (
                 <div
                   key={service.id}
-                  className="bg-white rounded-xl border border-border/50 p-4 flex items-center justify-between"
+                  className="bg-white rounded-xl border border-border/50 p-3 md:p-4 flex items-center justify-between"
                 >
-                  <div>
-                    <p className="text-sm font-medium text-foreground">{service.name}</p>
-                    <div className="flex items-center gap-3 mt-1">
+                  <div className="min-w-0 pr-3">
+                    <p className="text-sm font-medium text-foreground truncate">{service.name}</p>
+                    <div className="flex flex-wrap items-center gap-2 md:gap-3 mt-1">
                       <span className="text-xs text-muted-foreground flex items-center gap-1">
-                        <Clock className="h-3 w-3" />
+                        <Clock className="h-3 w-3 shrink-0" />
                         {service.timeLabel}
                       </span>
                       <span className="text-xs font-medium text-[#C9AA8B]">
@@ -114,7 +114,7 @@ export default function DashboardServicesPage() {
                       </span>
                     </div>
                   </div>
-                  <div className="flex gap-1.5">
+                  <div className="flex gap-1.5 shrink-0">
                     <button className="h-8 w-8 rounded-lg border border-border flex items-center justify-center hover:bg-muted transition-colors">
                       <Pencil className="h-3.5 w-3.5 text-muted-foreground" />
                     </button>

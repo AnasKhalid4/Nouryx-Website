@@ -18,34 +18,34 @@ export default function DashboardHomePage() {
   const todayBookings = mockBookings.filter((b) => b.status === "inprocess").slice(0, 4);
 
   return (
-    <div className="p-6 lg:p-10 max-w-7xl mx-auto w-full">
-      <div className="mb-8">
-        <h1 className="text-2xl font-bold text-foreground">
+    <div className="p-4 md:p-6 lg:p-10 max-w-7xl mx-auto w-full">
+      <div className="mb-6 md:mb-8">
+        <h1 className="text-xl md:text-2xl font-bold text-foreground">
           {t.dashboard.welcome}, Marie 👋
         </h1>
-        <p className="text-sm text-muted-foreground mt-1">
+        <p className="text-xs md:text-sm text-muted-foreground mt-1">
           Here&apos;s what&apos;s happening with your salon today.
         </p>
       </div>
 
       {/* Stats Grid */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-5 mb-10">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-5 mb-8 md:mb-10">
         {stats.map((stat) => (
-          <div key={stat.label} className="bg-white rounded-2xl border border-border/50 p-6">
-            <div className="flex items-center justify-between mb-3">
-              <div className={`h-10 w-10 rounded-lg flex items-center justify-center ${stat.color}`}>
-                <stat.icon className="h-5 w-5" />
+          <div key={stat.label} className="bg-white rounded-xl md:rounded-2xl border border-border/50 p-4 md:p-6">
+            <div className="flex items-center justify-between mb-2 md:mb-3">
+              <div className={`h-8 w-8 md:h-10 md:w-10 rounded-lg flex items-center justify-center ${stat.color}`}>
+                <stat.icon className="h-4 w-4 md:h-5 md:w-5" />
               </div>
             </div>
-            <p className="text-2xl font-bold text-foreground">{stat.value}</p>
-            <p className="text-xs text-muted-foreground mt-1">{stat.label}</p>
+            <p className="text-xl md:text-2xl font-bold text-foreground">{stat.value}</p>
+            <p className="text-[10px] md:text-xs text-muted-foreground mt-1">{stat.label}</p>
           </div>
         ))}
       </div>
 
       {/* Today's Bookings */}
-      <div className="bg-white rounded-2xl border border-border/50 p-6">
-        <div className="flex items-center justify-between mb-4">
+      <div className="bg-white rounded-xl md:rounded-2xl border border-border/50 p-4 md:p-6">
+        <div className="flex flex-row items-center justify-between mb-4 gap-2">
           <h2 className="font-semibold text-foreground">{t.dashboard.todayBookings}</h2>
           <Link href="/dashboard/bookings" className="text-xs text-[#C9AA8B] hover:text-[#B8956F] font-medium">
             {t.common.viewAll}

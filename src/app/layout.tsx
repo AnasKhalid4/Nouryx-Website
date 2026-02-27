@@ -14,6 +14,8 @@ const montserrat = Montserrat({
   weight: ["400", "500", "600", "700"],
 });
 
+import { GlobalLoader } from "@/components/ui/global-loader";
+
 export const metadata: Metadata = {
   title: "Nouryx — Book Beauty & Wellness Services",
   description:
@@ -28,6 +30,7 @@ export default function RootLayout({
   return (
     <html lang="fr">
       <body className={`${publicSans.variable} ${montserrat.variable} font-body antialiased`}>
+        <GlobalLoader />
         {children}
       </body>
     </html>

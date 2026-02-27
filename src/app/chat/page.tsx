@@ -3,10 +3,11 @@
 import { Header } from "@/components/layout/header";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { MessageSquare, Send, ImagePlus, Search } from "lucide-react";
+import { MessageSquare, Send, ImagePlus, Search, ArrowLeft } from "lucide-react";
 import { useLocale } from "@/hooks/use-locale";
 import { mockConversations, mockMessages } from "@/data/mock-salons";
 import { useState } from "react";
+import Link from "next/link";
 
 function timeAgo(dateStr: string) {
   const diff = Date.now() - new Date(dateStr).getTime();
@@ -19,9 +20,7 @@ function timeAgo(dateStr: string) {
 
 export default function ChatPage() {
   const { t } = useLocale();
-  const [activeConv, setActiveConv] = useState<string | null>(
-    mockConversations.length > 0 ? mockConversations[0].conversationId : null
-  );
+  const [activeConv, setActiveConv] = useState<string | null>(null);
   const [message, setMessage] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
   const currentUserId = "u1";
@@ -37,10 +36,15 @@ export default function ChatPage() {
       <Header />
       <div className="flex-1 flex overflow-hidden border-t border-border">
         {/* Left Sidebar — Conversations */}
-        <div className="w-full max-w-95 bg-white border-r border-border flex flex-col">
+        <div className={`w-full md:w-80 lg:w-96 bg-white border-r border-border flex flex-col ${activeConv ? 'hidden md:flex' : 'flex'}`}>
           {/* Sidebar Header */}
           <div className="p-4 border-b border-border/50">
-            <h2 className="text-lg font-bold text-foreground mb-3">{t.chat.title}</h2>
+            <div className="flex items-center gap-3 mb-3">
+              <Link href="/dashboard" className="h-8 w-8 -ml-1.5 rounded-lg flex items-center justify-center hover:bg-muted transition-colors text-muted-foreground shrink-0">
+                <ArrowLeft className="h-5 w-5" />
+              </Link>
+              <h2 className="text-lg font-bold text-foreground">{t.chat.title}</h2>
+            </div>
             <div className="relative">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
@@ -60,9 +64,8 @@ export default function ChatPage() {
                 <button
                   key={conv.conversationId}
                   onClick={() => setActiveConv(conv.conversationId)}
-                  className={`w-full flex items-center gap-3 px-4 py-3.5 text-left transition-colors border-b border-border/30 ${
-                    isActive ? "bg-[#C9AA8B]/8" : "hover:bg-muted/50"
-                  }`}
+                  className={`w-full flex items-center gap-3 px-4 py-3.5 text-left transition-colors border-b border-border/30 ${isActive ? "bg-[#C9AA8B]/8 hidden md:flex" : "hover:bg-muted/50 flex"
+                    }`}
                 >
                   <div className="h-12 w-12 rounded-full bg-linear-to-br from-[#E8D5C0] to-[#F5EDE6] flex items-center justify-center shrink-0">
                     <span className="text-[#C9AA8B] font-bold">
@@ -89,11 +92,17 @@ export default function ChatPage() {
         </div>
 
         {/* Right Panel — Chat Thread */}
-        <div className="flex-1 flex flex-col bg-[#FAFAF8]">
+        <div className={`flex-1 flex-col bg-[#FAFAF8] ${!activeConv ? 'hidden md:flex' : 'flex'}`}>
           {activeConvData ? (
             <>
               {/* Chat Header */}
-              <div className="bg-white border-b border-border/50 px-6 py-3 flex items-center gap-3">
+              <div className="bg-white border-b border-border/50 px-4 md:px-6 py-3 flex items-center gap-3">
+                <button
+                  onClick={() => setActiveConv(null)}
+                  className="md:hidden h-9 w-9 -ml-2 rounded-lg flex items-center justify-center hover:bg-muted transition-colors text-muted-foreground shrink-0"
+                >
+                  <ArrowLeft className="h-5 w-5" />
+                </button>
                 <div className="h-10 w-10 rounded-full bg-linear-to-br from-[#E8D5C0] to-[#F5EDE6] flex items-center justify-center shrink-0">
                   <span className="text-[#C9AA8B] font-bold text-sm">
                     {activeConvData.otherParty.name.charAt(0)}
@@ -106,18 +115,17 @@ export default function ChatPage() {
               </div>
 
               {/* Messages */}
-              <div className="flex-1 overflow-y-auto px-6 py-4">
+              <div className="flex-1 overflow-y-auto px-4 md:px-6 py-4">
                 <div className="space-y-3 max-w-3xl mx-auto">
                   {mockMessages.map((msg) => {
                     const isMe = msg.senderId === currentUserId;
                     return (
                       <div key={msg.id} className={`flex ${isMe ? "justify-end" : "justify-start"}`}>
                         <div
-                          className={`max-w-[65%] px-4 py-2.5 rounded-2xl text-sm shadow-[0_1px_2px_rgba(0,0,0,0.04)] ${
-                            isMe
-                              ? "bg-[#C9AA8B] text-white rounded-br-md"
-                              : "bg-white text-foreground rounded-bl-md"
-                          }`}
+                          className={`max-w-[85%] md:max-w-[65%] px-4 py-2.5 rounded-2xl text-sm shadow-[0_1px_2px_rgba(0,0,0,0.04)] ${isMe
+                            ? "bg-[#C9AA8B] text-white rounded-br-md"
+                            : "bg-white text-foreground rounded-bl-md"
+                            }`}
                         >
                           <p>{msg.text}</p>
                           <p className={`text-[10px] mt-1 text-right ${isMe ? "text-white/60" : "text-muted-foreground"}`}>
@@ -131,10 +139,10 @@ export default function ChatPage() {
               </div>
 
               {/* Input */}
-              <div className="bg-white border-t border-border/50 px-6 py-3">
+              <div className="bg-white border-t border-border/50 px-4 md:px-6 py-3">
                 <form
                   onSubmit={(e) => { e.preventDefault(); setMessage(""); }}
-                  className="flex items-center gap-3 max-w-3xl mx-auto"
+                  className="flex items-center gap-2 md:gap-3 max-w-3xl mx-auto"
                 >
                   <button type="button" className="h-10 w-10 rounded-full flex items-center justify-center hover:bg-muted transition-colors text-muted-foreground shrink-0">
                     <ImagePlus className="h-5 w-5" />
@@ -143,7 +151,7 @@ export default function ChatPage() {
                     value={message}
                     onChange={(e) => setMessage(e.target.value)}
                     placeholder={t.chat.placeholder}
-                    className="flex-1 h-10 rounded-full bg-[#FAFAF8] border-border/50"
+                    className="flex-1 h-10 rounded-full bg-[#FAFAF8] border-border/50 text-base md:text-sm"
                   />
                   <Button
                     type="submit"

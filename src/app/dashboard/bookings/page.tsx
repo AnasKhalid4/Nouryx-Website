@@ -8,7 +8,7 @@ import { useLocale } from "@/hooks/use-locale";
 import { mockBookings } from "@/data/mock-salons";
 import { useState } from "react";
 
-const timeSlots = ["08:00","09:00","10:00","11:00","12:00","13:00","14:00","15:00","16:00","17:00","18:00","19:00"];
+const timeSlots = ["08:00", "09:00", "10:00", "11:00", "12:00", "13:00", "14:00", "15:00", "16:00", "17:00", "18:00", "19:00"];
 
 const statusBadgeColors: Record<string, string> = {
   pending: "bg-amber-50 text-amber-700 border-amber-200",
@@ -193,15 +193,15 @@ export default function DashboardBookingsPage() {
                 {(listData[status] || []).length > 0 ? (
                   (listData[status] || []).map((booking) => (
                     <div key={booking.bookingId} className="bg-white rounded-xl border border-border/50 p-4">
-                      <div className="flex gap-4">
+                      <div className="flex flex-col sm:flex-row gap-4">
                         <div className="h-12 w-12 rounded-full bg-[#E8D5C0] flex items-center justify-center shrink-0">
                           <User className="h-5 w-5 text-[#8B7355]" />
                         </div>
                         <div className="flex-1 min-w-0">
-                          <div className="flex items-start justify-between gap-2">
+                          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
                             <div>
                               <h3 className="font-semibold text-sm text-foreground">{booking.user.fullName}</h3>
-                              <div className="flex items-center gap-2 mt-1 text-xs text-muted-foreground">
+                              <div className="flex flex-wrap items-center gap-2 mt-1 text-xs text-muted-foreground">
                                 <span className="flex items-center gap-1">
                                   <CalendarDays className="h-3 w-3" />
                                   {new Date(booking.schedule.startAt).toLocaleDateString()}
@@ -216,7 +216,7 @@ export default function DashboardBookingsPage() {
                               {booking.status}
                             </Badge>
                           </div>
-                          <div className="flex flex-wrap gap-1.5 mt-2">
+                          <div className="flex flex-wrap gap-1.5 mt-2 md:mt-3">
                             {booking.services.map((s, i) => (
                               <span key={i} className="text-[10px] px-2 py-0.5 bg-[#F5EDE6] text-[#8B7355] rounded-full">
                                 {s.name}
@@ -225,20 +225,21 @@ export default function DashboardBookingsPage() {
                           </div>
                         </div>
                       </div>
-                      <div className="flex items-center justify-between mt-3 pt-3 border-t border-border/50">
-                        <span className="font-semibold text-sm">{t.common.currency}{booking.pricing.total}</span>
-                        <div className="flex gap-2">
-                          <Button variant="outline" size="sm" className="text-xs rounded-lg h-7 gap-1">
+                      <div className="flex flex-col sm:flex-row sm:items-center justify-between mt-4 pt-3 border-t border-border/50 gap-3">
+                        <span className="font-semibold text-sm self-start sm:self-auto">{t.common.currency}{booking.pricing.total}</span>
+                        <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">
+                          <Button variant="outline" size="sm" className="text-xs rounded-lg h-7 gap-1 flex-1 sm:flex-none justify-center">
                             <Eye className="h-3 w-3" />
-                            {t.dashboard.bookings.viewDetails}
+                            <span className="hidden sm:inline">{t.dashboard.bookings.viewDetails}</span>
+                            <span className="sm:hidden">View</span>
                           </Button>
                           {status === "pending" && (
                             <>
-                              <Button size="sm" className="text-xs rounded-lg h-7 gap-1 bg-emerald-600 hover:bg-emerald-700 text-white">
+                              <Button size="sm" className="text-xs rounded-lg h-7 gap-1 bg-emerald-600 hover:bg-emerald-700 text-white flex-1 sm:flex-none justify-center">
                                 <Check className="h-3 w-3" />
                                 {t.dashboard.bookings.accept}
                               </Button>
-                              <Button variant="outline" size="sm" className="text-xs rounded-lg h-7 gap-1 text-destructive border-destructive/30">
+                              <Button variant="outline" size="sm" className="text-xs rounded-lg h-7 gap-1 text-destructive border-destructive/30 flex-1 sm:flex-none justify-center">
                                 <X className="h-3 w-3" />
                                 {t.dashboard.bookings.decline}
                               </Button>
@@ -246,11 +247,11 @@ export default function DashboardBookingsPage() {
                           )}
                           {status === "inprocess" && (
                             <>
-                              <Button size="sm" className="text-xs rounded-lg h-7 gap-1 bg-[#C9AA8B] hover:bg-[#B8956F] text-white">
+                              <Button size="sm" className="text-xs rounded-lg h-7 gap-1 bg-[#C9AA8B] hover:bg-[#B8956F] text-white flex-1 sm:flex-none justify-center">
                                 <Check className="h-3 w-3" />
                                 {t.dashboard.bookings.complete}
                               </Button>
-                              <Button variant="outline" size="sm" className="text-xs rounded-lg h-7 text-destructive border-destructive/30">
+                              <Button variant="outline" size="sm" className="text-xs rounded-lg h-7 text-destructive border-destructive/30 flex-1 sm:flex-none justify-center">
                                 {t.dashboard.bookings.cancel}
                               </Button>
                             </>

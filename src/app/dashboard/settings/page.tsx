@@ -17,36 +17,35 @@ export default function DashboardSettingsPage() {
   ];
 
   return (
-    <div className="p-6 lg:p-10 max-w-3xl mx-auto w-full">
-      <h1 className="text-2xl font-bold text-foreground mb-6">{t.settings.title}</h1>
+    <div className="p-4 md:p-6 lg:p-10 max-w-3xl mx-auto w-full">
+      <h1 className="text-xl md:text-2xl font-bold text-foreground mb-4 md:mb-6">{t.settings.title}</h1>
 
       <div className="bg-white rounded-xl border border-border/50 overflow-hidden mb-4">
         {items.map((item, i) => {
           const content = (
             <div
-              className={`flex items-center justify-between px-5 py-4 hover:bg-muted/50 transition-colors cursor-pointer ${
-                i > 0 ? "border-t border-border/50" : ""
-              }`}
+              className={`flex items-center justify-between px-4 md:px-5 py-3.5 md:py-4 hover:bg-muted/50 transition-colors cursor-pointer ${i > 0 ? "border-t border-border/50" : ""
+                }`}
             >
               <div className="flex items-center gap-3">
-                <div className="h-9 w-9 rounded-lg bg-[#F5EDE6] flex items-center justify-center">
+                <div className="h-8 w-8 md:h-9 md:w-9 rounded-lg bg-[#F5EDE6] flex items-center justify-center shrink-0">
                   <item.icon className="h-4 w-4 text-[#C9AA8B]" />
                 </div>
                 <span className="text-sm font-medium text-foreground">{item.label}</span>
               </div>
-              <ChevronRight className="h-4 w-4 text-muted-foreground" />
+              <ChevronRight className="h-4 w-4 text-muted-foreground shrink-0" />
             </div>
           );
 
           if (item.external) {
             return (
-              <a key={item.label} href={item.href} target="_blank" rel="noopener noreferrer">
+              <a key={item.label} href={item.href} target="_blank" rel="noopener noreferrer" className="block">
                 {content}
               </a>
             );
           }
           return (
-            <Link key={item.label} href={item.href}>
+            <Link key={item.label} href={item.href} className="block">
               {content}
             </Link>
           );
@@ -54,23 +53,23 @@ export default function DashboardSettingsPage() {
       </div>
 
       <div className="bg-white rounded-xl border border-border/50 overflow-hidden">
-        <button className="w-full flex items-center justify-between px-5 py-4 hover:bg-red-50/50 transition-colors">
+        <button className="w-full flex items-center justify-between px-4 md:px-5 py-3.5 md:py-4 hover:bg-red-50/50 transition-colors text-left">
           <div className="flex items-center gap-3">
-            <div className="h-9 w-9 rounded-lg bg-red-50 flex items-center justify-center">
+            <div className="h-8 w-8 md:h-9 md:w-9 rounded-lg bg-red-50 flex items-center justify-center shrink-0">
               <Trash2 className="h-4 w-4 text-destructive" />
             </div>
             <span className="text-sm font-medium text-destructive">{t.settings.deleteAccount}</span>
           </div>
-          <ChevronRight className="h-4 w-4 text-muted-foreground" />
+          <ChevronRight className="h-4 w-4 text-muted-foreground shrink-0" />
         </button>
-        <button className="w-full flex items-center justify-between px-5 py-4 hover:bg-muted/50 transition-colors border-t border-border/50">
+        <button className="w-full flex items-center justify-between px-4 md:px-5 py-3.5 md:py-4 hover:bg-muted/50 transition-colors border-t border-border/50 text-left">
           <div className="flex items-center gap-3">
-            <div className="h-9 w-9 rounded-lg bg-muted flex items-center justify-center">
+            <div className="h-8 w-8 md:h-9 md:w-9 rounded-lg bg-muted flex items-center justify-center shrink-0">
               <LogOut className="h-4 w-4 text-foreground" />
             </div>
             <span className="text-sm font-medium text-foreground">{t.settings.logout}</span>
           </div>
-          <ChevronRight className="h-4 w-4 text-muted-foreground" />
+          <ChevronRight className="h-4 w-4 text-muted-foreground shrink-0" />
         </button>
       </div>
     </div>
