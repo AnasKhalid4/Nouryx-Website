@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 const COLORS = {
   accent: "#C9AA8B",
@@ -11,11 +12,11 @@ const COLORS = {
 
 interface IconProps { size?: number; style?: React.CSSProperties; }
 
-const Mail      = ({ size = 14, style }: IconProps) => <svg width={size} height={size} style={style} fill="none" stroke="currentColor" strokeWidth={1.8} viewBox="0 0 24 24"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M2 7l10 7 10-7"/></svg>;
-const Lock      = ({ size = 14, style }: IconProps) => <svg width={size} height={size} style={style} fill="none" stroke="currentColor" strokeWidth={1.8} viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>;
-const EyeIcon   = ({ size = 14, style }: IconProps) => <svg width={size} height={size} style={style} fill="none" stroke="currentColor" strokeWidth={1.8} viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>;
-const EyeOff    = ({ size = 14, style }: IconProps) => <svg width={size} height={size} style={style} fill="none" stroke="currentColor" strokeWidth={1.8} viewBox="0 0 24 24"><path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94"/><path d="M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19"/><line x1="1" y1="1" x2="23" y2="23"/></svg>;
-const ArrowLeft = ({ size = 14, style }: IconProps) => <svg width={size} height={size} style={style} fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>;
+const Mail = ({ size = 14, style }: IconProps) => <svg width={size} height={size} style={style} fill="none" stroke="currentColor" strokeWidth={1.8} viewBox="0 0 24 24"><rect x="2" y="4" width="20" height="16" rx="2" /><path d="M2 7l10 7 10-7" /></svg>;
+const Lock = ({ size = 14, style }: IconProps) => <svg width={size} height={size} style={style} fill="none" stroke="currentColor" strokeWidth={1.8} viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" /><path d="M7 11V7a5 5 0 0110 0v4" /></svg>;
+const EyeIcon = ({ size = 14, style }: IconProps) => <svg width={size} height={size} style={style} fill="none" stroke="currentColor" strokeWidth={1.8} viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" /><circle cx="12" cy="12" r="3" /></svg>;
+const EyeOff = ({ size = 14, style }: IconProps) => <svg width={size} height={size} style={style} fill="none" stroke="currentColor" strokeWidth={1.8} viewBox="0 0 24 24"><path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94" /><path d="M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19" /><line x1="1" y1="1" x2="23" y2="23" /></svg>;
+const ArrowLeft = ({ size = 14, style }: IconProps) => <svg width={size} height={size} style={style} fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24"><line x1="19" y1="12" x2="5" y2="12" /><polyline points="12 19 5 12 12 5" /></svg>;
 
 function AppInput({ icon: Icon, type = "text", placeholder, rightIcon, onRightIcon }: { icon?: React.ComponentType<IconProps>; type?: string; placeholder?: string; rightIcon?: React.ReactNode; onRightIcon?: () => void }) {
   return (
@@ -25,7 +26,7 @@ function AppInput({ icon: Icon, type = "text", placeholder, rightIcon, onRightIc
         type={type} placeholder={placeholder}
         style={{ width: "100%", height: 46, borderRadius: 10, border: "1.5px solid #E5E7EB", background: "#FAFAF9", padding: Icon ? "0 38px 0 40px" : "0 13px", fontSize: 14, color: "#1C1917", outline: "none", transition: "border-color 0.2s, box-shadow 0.2s", letterSpacing: "0.01em", boxSizing: "border-box" }}
         onFocus={(e) => { e.currentTarget.style.borderColor = COLORS.accent; e.currentTarget.style.boxShadow = `0 0 0 3px ${COLORS.accentLight}`; }}
-        onBlur={(e)  => { e.currentTarget.style.borderColor = "#E5E7EB"; e.currentTarget.style.boxShadow = "none"; }}
+        onBlur={(e) => { e.currentTarget.style.borderColor = "#E5E7EB"; e.currentTarget.style.boxShadow = "none"; }}
       />
       {rightIcon && <button type="button" onClick={onRightIcon} style={{ position: "absolute", right: 12, background: "none", border: "none", cursor: "pointer", color: "#9CA3AF", display: "flex", padding: 0 }}>{rightIcon}</button>}
     </div>
@@ -37,6 +38,7 @@ function FieldLabel({ children }: { children: React.ReactNode }) {
 }
 
 export default function LoginPage() {
+  const router = useRouter();
   const [showPw, setShowPw] = useState(false);
   const [hovBtn, setHovBtn] = useState(false);
   const [hovBack, setHovBack] = useState(false);
@@ -140,7 +142,7 @@ export default function LoginPage() {
 
       <div className="login-root">
 
-    
+
         {/* LEFT — form */}
         <div className="login-left">
 
@@ -155,7 +157,7 @@ export default function LoginPage() {
 
             {/* Back to Home */}
             <button
-              onClick={() => window.location.href = "/"}
+              onClick={() => router.push("/")}
               onMouseEnter={() => setHovBack(true)}
               onMouseLeave={() => setHovBack(false)}
               style={{ display: "flex", alignItems: "center", gap: 6, background: hovBack ? "#F5F0EB" : "transparent", border: "none", cursor: "pointer", color: hovBack ? "#1C1917" : "#78716C", fontSize: 12, fontWeight: 500, letterSpacing: "0.04em", padding: "6px 10px", borderRadius: 8, transition: "all 0.2s", whiteSpace: "nowrap" }}>
@@ -212,7 +214,7 @@ export default function LoginPage() {
             </div>
           </div>
         </div>
-    {/* RIGHT — hero image (rendered first in DOM so mobile order: -1 works) */}
+        {/* RIGHT — hero image (rendered first in DOM so mobile order: -1 works) */}
         <div className="login-right">
           <div style={{ position: "absolute", inset: 0, backgroundImage: `url('https://images.unsplash.com/photo-1521590832167-7bcbfaa6381f?w=1200&q=80')`, backgroundSize: "cover", backgroundPosition: "center" }} />
           <div style={{ position: "absolute", inset: 0, background: "linear-gradient(160deg, rgba(28,25,23,0.45) 0%, rgba(201,170,139,0.08) 55%, rgba(28,25,23,0.75) 100%)" }} />

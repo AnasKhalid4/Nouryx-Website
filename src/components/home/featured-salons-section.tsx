@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { useLocale } from "@/hooks/use-locale";
 import { mockSalons } from "@/data/mock-salons";
 import Link from "next/link";
+import Image from "next/image";
 
 export function FeaturedSalonsSection() {
   const { t } = useLocale();
@@ -41,10 +42,12 @@ export function FeaturedSalonsSection() {
               {/* Image */}
               <div className="relative aspect-[4/3] bg-[#F5EDE6] overflow-hidden">
                 <div className="absolute inset-0 bg-linear-to-t from-black/20 to-transparent z-10" />
-                <img
+                <Image
                   src={salon.shopImages[0]}
                   alt={salon.shopName}
-                  className="w-full h-full object-cover"
+                  fill
+                  className="object-cover"
+                  sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw"
                 />
               </div>
 

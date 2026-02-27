@@ -173,17 +173,17 @@ export default function DashboardBookingsPage() {
       {view === "list" && (
         <div>
           <Tabs value={listTab} onValueChange={setListTab}>
-            <TabsList className="bg-white border border-border/50 rounded-xl p-1 w-full">
-              <TabsTrigger value="pending" className="flex-1 rounded-lg text-xs data-[state=active]:bg-[#C9AA8B] data-[state=active]:text-white">
+            <TabsList className="bg-white border border-border/50 rounded-xl p-1 flex w-full overflow-x-auto justify-start sm:justify-center [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+              <TabsTrigger value="pending" className="flex-none sm:flex-1 px-4 sm:px-2 rounded-lg text-xs data-[state=active]:bg-[#C9AA8B] data-[state=active]:text-white">
                 {t.dashboard.bookings.tabs.pending} ({pending.length})
               </TabsTrigger>
-              <TabsTrigger value="inprocess" className="flex-1 rounded-lg text-xs data-[state=active]:bg-[#C9AA8B] data-[state=active]:text-white">
+              <TabsTrigger value="inprocess" className="flex-none sm:flex-1 px-4 sm:px-2 rounded-lg text-xs data-[state=active]:bg-[#C9AA8B] data-[state=active]:text-white">
                 {t.dashboard.bookings.tabs.inprocess} ({inprocess.length})
               </TabsTrigger>
-              <TabsTrigger value="completed" className="flex-1 rounded-lg text-xs data-[state=active]:bg-[#C9AA8B] data-[state=active]:text-white">
+              <TabsTrigger value="completed" className="flex-none sm:flex-1 px-4 sm:px-2 rounded-lg text-xs data-[state=active]:bg-[#C9AA8B] data-[state=active]:text-white">
                 {t.dashboard.bookings.tabs.completed} ({completed.length})
               </TabsTrigger>
-              <TabsTrigger value="cancelled" className="flex-1 rounded-lg text-xs data-[state=active]:bg-[#C9AA8B] data-[state=active]:text-white">
+              <TabsTrigger value="cancelled" className="flex-none sm:flex-1 px-4 sm:px-2 rounded-lg text-xs data-[state=active]:bg-[#C9AA8B] data-[state=active]:text-white">
                 {t.dashboard.bookings.tabs.cancelled} ({cancelled.length})
               </TabsTrigger>
             </TabsList>

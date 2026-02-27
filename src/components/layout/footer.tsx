@@ -2,14 +2,30 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { Facebook, Twitter, Linkedin, Instagram } from "lucide-react";
+import { Facebook, Linkedin, Instagram } from "lucide-react";
 import { useLocale } from "@/hooks/use-locale";
+
+const TiktokIcon = ({ className }: { className?: string }) => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    className={className}
+  >
+    <path d="M9 12a4 4 0 1 0 4 4V4a5 5 0 0 0 5 5" />
+  </svg>
+);
+
 // This is the footer section and add section  and update footer logo
 const socialIcons = [
-  { name: "Facebook", icon: Facebook, href: "#" },
-  { name: "Twitter", icon: Twitter, href: "#" },
-  { name: "LinkedIn", icon: Linkedin, href: "#" },
-  { name: "Instagram", icon: Instagram, href: "#" },
+  { name: "Instagram", icon: Instagram, href: "https://www.instagram.com/nouryx_reservation/" },
+  { name: "LinkedIn", icon: Linkedin, href: "https://www.linkedin.com/in/nouryx-reservation-18504939b" },
+  { name: "Facebook", icon: Facebook, href: "https://www.facebook.com/nouryxreservation" },
+  { name: "TikTok", icon: TiktokIcon, href: "https://www.tiktok.com/@nouryx_reservation?_r=1&_t=ZN-9422dJocjXL" },
 ];
 
 export function Footer() {
@@ -45,7 +61,7 @@ export function Footer() {
         <div className="grid grid-cols-2 md:grid-cols-5 gap-8">
           {/* Brand */}
           <div className="col-span-2 md:col-span-1">
-          
+
             <div className="flex gap-3 mt-4">
               {socialIcons.map((social) => (
                 <a
@@ -101,7 +117,7 @@ export function Footer() {
             </ul>
           </div>
         </div>
-   <div className="text-center">
+        <div className="text-center">
           <div className="relative w-32 h-16 sm:w-48 sm:h-24 md:w-64 md:h-32 lg:w-80 lg:h-40 xl:w-96 xl:h-48 mx-auto">
             <Image
               src="/images/website-logo.png"

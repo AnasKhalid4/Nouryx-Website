@@ -8,6 +8,7 @@ import type { Content } from "@/data/content.en";
 type Locale = "en" | "fr";
 
 const STORAGE_KEY = "nouryx_locale";
+const EVENT_KEY = "nouryx_locale_change";
 
 // Initialize locale from localStorage immediately to prevent flash
 function getInitialLocale(): Locale {
@@ -29,17 +30,28 @@ export function useLocale() {
     if (saved === "en" || saved === "fr") {
       setLocaleState(saved);
     }
+
+    // Listen to custom event for cross-component reactivity
+    const handleLocaleChange = (e: Event) => {
+      const customEvent = e as CustomEvent<Locale>;
+      if (customEvent.detail) setLocaleState(customEvent.detail);
+    };
+
+    window.addEventListener(EVENT_KEY, handleLocaleChange);
+    return () => window.removeEventListener(EVENT_KEY, handleLocaleChange);
   }, []);
 
   const setLocale = useCallback((newLocale: Locale) => {
     setLocaleState(newLocale);
     localStorage.setItem(STORAGE_KEY, newLocale);
+    window.dispatchEvent(new CustomEvent(EVENT_KEY, { detail: newLocale }));
   }, []);
 
   const toggleLocale = useCallback(() => {
     const newLocale = locale === "fr" ? "en" : "fr";
     setLocaleState(newLocale);
     localStorage.setItem(STORAGE_KEY, newLocale);
+    window.dispatchEvent(new CustomEvent(EVENT_KEY, { detail: newLocale }));
   }, [locale]);
 
   const t: Content = locale === "fr" ? frContent : enContent;

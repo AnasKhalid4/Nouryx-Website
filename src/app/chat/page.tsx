@@ -40,7 +40,7 @@ export default function ChatPage() {
           {/* Sidebar Header */}
           <div className="p-4 border-b border-border/50">
             <div className="flex items-center gap-3 mb-3">
-              <Link href="/dashboard" className="h-8 w-8 -ml-1.5 rounded-lg flex items-center justify-center hover:bg-muted transition-colors text-muted-foreground shrink-0">
+              <Link href="/dashboard" className="h-8 w-8 -ml-1.5 rounded-lg flex items-center justify-center hover:bg-muted transition-colors text-muted-foreground shrink-0" aria-label="Back to dashboard">
                 <ArrowLeft className="h-5 w-5" />
               </Link>
               <h2 className="text-lg font-bold text-foreground">{t.chat.title}</h2>
@@ -100,6 +100,7 @@ export default function ChatPage() {
                 <button
                   onClick={() => setActiveConv(null)}
                   className="md:hidden h-9 w-9 -ml-2 rounded-lg flex items-center justify-center hover:bg-muted transition-colors text-muted-foreground shrink-0"
+                  aria-label="Back to conversation list"
                 >
                   <ArrowLeft className="h-5 w-5" />
                 </button>
@@ -144,7 +145,7 @@ export default function ChatPage() {
                   onSubmit={(e) => { e.preventDefault(); setMessage(""); }}
                   className="flex items-center gap-2 md:gap-3 max-w-3xl mx-auto"
                 >
-                  <button type="button" className="h-10 w-10 rounded-full flex items-center justify-center hover:bg-muted transition-colors text-muted-foreground shrink-0">
+                  <button type="button" className="h-10 w-10 rounded-full flex items-center justify-center hover:bg-muted transition-colors text-muted-foreground shrink-0" aria-label="Attach image">
                     <ImagePlus className="h-5 w-5" />
                   </button>
                   <Input
@@ -158,6 +159,7 @@ export default function ChatPage() {
                     size="icon"
                     disabled={!message.trim()}
                     className="h-10 w-10 rounded-full bg-[#C9AA8B] hover:bg-[#B8956F] text-white disabled:opacity-50 shrink-0"
+                    aria-label="Send message"
                   >
                     <Send className="h-4 w-4" />
                   </Button>

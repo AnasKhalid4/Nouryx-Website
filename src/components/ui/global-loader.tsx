@@ -17,8 +17,26 @@ export function GlobalLoader() {
     if (!show) return null;
 
     return (
-        <div className="fixed inset-0 z-[9999] flex flex-col items-center justify-center bg-white overflow-hidden animate-loader-fade-out pointer-events-none">
-            <style>{`
+        <>
+            <script
+                dangerouslySetInnerHTML={{
+                    __html: `
+                        if (sessionStorage.getItem('nouryx_loader_played')) {
+                            document.documentElement.classList.add('hide-global-loader');
+                        } else {
+                            sessionStorage.setItem('nouryx_loader_played', 'true');
+                        }
+                    `
+                }}
+            />
+            <div id="nouryx-global-loader" className="fixed inset-0 z-[9999] flex flex-col items-center justify-center bg-white overflow-hidden animate-loader-fade-out pointer-events-none">
+                <style>{`
+        /* Instantly hide loader if returning user in same session */
+        .hide-global-loader #nouryx-global-loader {
+            display: none !important;
+            animation: none !important;
+        }
+
         .logo-svg {
           width: 320px;
           overflow: visible;
@@ -183,88 +201,89 @@ export function GlobalLoader() {
         }
       `}</style>
 
-            <div className="logo-wrap relative flex items-center justify-center">
-                <svg className="logo-svg" viewBox="0 0 340 90" xmlns="http://www.w3.org/2000/svg">
-                    <defs>
-                        {/* Shimmer gradient */}
-                        <linearGradient id="shimmerGrad" x1="0%" y1="0%" x2="100%" y2="0%">
-                            <stop offset="0%" stopColor="transparent" />
-                            <stop offset="45%" stopColor="rgba(255,230,170,0.55)" />
-                            <stop offset="55%" stopColor="rgba(255,230,170,0.55)" />
-                            <stop offset="100%" stopColor="transparent" />
-                            <animateTransform
-                                attributeName="gradientTransform"
-                                type="translate"
-                                from="-1 0"
-                                to="2 0"
-                                dur="1s"
-                                begin="1.8s"
-                                fill="freeze"
-                            />
-                        </linearGradient>
+                <div className="logo-wrap relative flex items-center justify-center">
+                    <svg className="logo-svg" viewBox="0 0 340 90" xmlns="http://www.w3.org/2000/svg">
+                        <defs>
+                            {/* Shimmer gradient */}
+                            <linearGradient id="shimmerGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                                <stop offset="0%" stopColor="transparent" />
+                                <stop offset="45%" stopColor="rgba(255,230,170,0.55)" />
+                                <stop offset="55%" stopColor="rgba(255,230,170,0.55)" />
+                                <stop offset="100%" stopColor="transparent" />
+                                <animateTransform
+                                    attributeName="gradientTransform"
+                                    type="translate"
+                                    from="-1 0"
+                                    to="2 0"
+                                    dur="1s"
+                                    begin="1.8s"
+                                    fill="freeze"
+                                />
+                            </linearGradient>
 
-                        {/* Gold gradient for fill */}
-                        <linearGradient id="goldGrad" x1="0%" y1="0%" x2="0%" y2="100%">
-                            <stop offset="0%" stopColor="#E8D5C0" />
-                            <stop offset="100%" stopColor="#8c7250" />
-                        </linearGradient>
+                            {/* Gold gradient for fill */}
+                            <linearGradient id="goldGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                                <stop offset="0%" stopColor="#E8D5C0" />
+                                <stop offset="100%" stopColor="#8c7250" />
+                            </linearGradient>
 
-                        <clipPath id="textClip">
-                            <text
-                                x="170"
-                                y="72"
-                                textAnchor="middle"
-                                className="font-heading"
-                                fontSize="72"
-                                fontWeight="300"
-                                letterSpacing="-1"
-                            >
-                                nouryx
-                            </text>
-                        </clipPath>
-                    </defs>
+                            <clipPath id="textClip">
+                                <text
+                                    x="170"
+                                    y="72"
+                                    textAnchor="middle"
+                                    className="font-heading"
+                                    fontSize="72"
+                                    fontWeight="300"
+                                    letterSpacing="-1"
+                                >
+                                    nouryx
+                                </text>
+                            </clipPath>
+                        </defs>
 
-                    {/* Stroke draw animation */}
-                    <text className="logo-text" x="170" y="72" textAnchor="middle">
-                        nouryx
-                    </text>
+                        {/* Stroke draw animation */}
+                        <text className="logo-text" x="170" y="72" textAnchor="middle">
+                            nouryx
+                        </text>
 
-                    {/* Fill fade in */}
-                    <text className="logo-text-fill" x="170" y="72" fill="url(#goldGrad)" textAnchor="middle">
-                        nouryx
-                    </text>
+                        {/* Fill fade in */}
+                        <text className="logo-text-fill" x="170" y="72" fill="url(#goldGrad)" textAnchor="middle">
+                            nouryx
+                        </text>
 
-                    {/* Shimmer sweep */}
-                    <rect
-                        className="shimmer-rect"
-                        x="0"
-                        y="0"
-                        width="340"
-                        height="90"
-                        clipPath="url(#textClip)"
-                    />
-                </svg>
+                        {/* Shimmer sweep */}
+                        <rect
+                            className="shimmer-rect"
+                            x="0"
+                            y="0"
+                            width="340"
+                            height="90"
+                            clipPath="url(#textClip)"
+                        />
+                    </svg>
+                </div>
+
+                {/* Divider line */}
+                <div className="line-wrap">
+                    <div className="line-inner"></div>
+                </div>
+
+                {/* Tagline */}
+                <div className="tagline">Loading your experience</div>
+
+                {/* Pulsing dots */}
+                <div className="dots">
+                    <div className="dot"></div>
+                    <div className="dot"></div>
+                    <div className="dot"></div>
+                </div>
+
+                {/* Progress bar */}
+                <div className="progress-wrap">
+                    <div className="progress-bar"></div>
+                </div>
             </div>
-
-            {/* Divider line */}
-            <div className="line-wrap">
-                <div className="line-inner"></div>
-            </div>
-
-            {/* Tagline */}
-            <div className="tagline">Loading your experience</div>
-
-            {/* Pulsing dots */}
-            <div className="dots">
-                <div className="dot"></div>
-                <div className="dot"></div>
-                <div className="dot"></div>
-            </div>
-
-            {/* Progress bar */}
-            <div className="progress-wrap">
-                <div className="progress-bar"></div>
-            </div>
-        </div>
+        </>
     );
 }

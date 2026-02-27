@@ -3,6 +3,7 @@ import { Header } from "@/components/layout/header";
 import { Footer } from "@/components/layout/footer";
 import { useLocale } from "@/hooks/use-locale";
 import { Heart, Shield, Lightbulb, Sparkles } from "lucide-react";
+import Image from "next/image";
 
 const valueIcons = [Lightbulb, Shield, Heart, Sparkles];
 
@@ -16,7 +17,7 @@ export default function AboutPage() {
         {/* Hero */}
         <section className="relative py-24 px-6 text-center overflow-hidden">
           {/* Background Image */}
-          <div 
+          <div
             className="absolute inset-0 bg-cover bg-center bg-no-repeat"
             style={{
               backgroundImage: "url('/images/about-us.png')",
@@ -24,7 +25,7 @@ export default function AboutPage() {
           />
           {/* Overlay */}
           <div className="absolute inset-0 bg-black/40" />
-          
+
           {/* Content */}
           <div className="relative z-10">
             <h1 className="font-serif text-5xl md:text-6xl text-white mb-4">
@@ -41,12 +42,14 @@ export default function AboutPage() {
           <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
 
             {/* Left — overlapping image collage */}
-<div className="relative h-[520px] flex-shrink-0 hidden md:block">              {/* Back image: tall portrait */}
+            <div className="relative h-[520px] flex-shrink-0 hidden md:block">              {/* Back image: tall portrait */}
               <div className="absolute top-0 left-0 w-[56%] h-[64%] rounded-2xl overflow-hidden">
-                <img
+                <Image
                   src="/images/salon-placeholder-5.webp"
                   alt="Nail technician at work"
-                  className="w-full h-full object-contain"
+                  fill
+                  className="object-cover"
+                  sizes="(max-width: 768px) 100vw, 50vw"
                 />
               </div>
               {/* Front image: round / clipped bottom-right */}
@@ -54,21 +57,23 @@ export default function AboutPage() {
                 className="absolute bottom-0 right-0 w-[58%] h-[68%] overflow-hidden"
                 style={{ borderRadius: "60% 60% 60% 0 / 60% 60% 60% 0" }}
               >
-                <img
+                <Image
                   src="/images/salon-placeholder-1.webp"
                   alt="Colorful nails close-up"
-                  className="w-full h-full object-contain"
+                  fill
+                  className="object-cover"
+                  sizes="(max-width: 768px) 100vw, 50vw"
                 />
               </div>
               {/* Decorative circle badge */}
-            
+
             </div>
 
             {/* Right — text and stats */}
             <div>
               {/* Label */}
               <p className="text-xs tracking-[0.2em] uppercase text-[#c9a98a] font-medium mb-3">
-                   {t.about.title}
+                {t.about.title}
               </p>
 
               {/* Headline */}

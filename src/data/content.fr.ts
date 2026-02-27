@@ -5,6 +5,7 @@ export const content = {
     salons: "Salons",
     pricing: "Tarifs",
     about: "À propos",
+    contact: "Contact",
     login: "Connexion",
     signup: "S'inscrire",
     listBusiness: "Inscrire votre salon",
@@ -235,6 +236,29 @@ export const content = {
     },
   },
 
+  // Contact Page
+  contact: {
+    title: "Nous Contacter",
+    subtitle: "Nous serions ravis de vous entendre",
+    getInTouch: "Entrer en contact",
+    text: "Vous avez une question, un commentaire ou besoin d'aide ? Notre équipe est là pour vous aider à tirer le meilleur parti de Nouryx.",
+    form: {
+      name: "Nom complet",
+      email: "Adresse e-mail",
+      subject: "Sujet",
+      message: "Message",
+      send: "Envoyer le message",
+      success: "Votre message a été envoyé avec succès. Nous vous répondrons dans les plus brefs délais.",
+      error: "Une erreur s'est produite lors de l'envoi de votre message. Veuillez réessayer.",
+    },
+    info: {
+      title: "Coordonnées",
+      email: "support@nouryx.com",
+      phone: "+33 1 23 45 67 89",
+      address: "123 Avenue des Champs-Élysées, 75008 Paris, France",
+    },
+  },
+
   // Auth
   auth: {
     login: {
@@ -446,7 +470,7 @@ export const content = {
       ],
     },
     profile: {
-      title: "Profil du salon",
+      title: "Profil",
       editBasic: "Modifier les infos de base",
       editBusiness: "Modifier les infos entreprise",
       editImages: "Modifier les photos",

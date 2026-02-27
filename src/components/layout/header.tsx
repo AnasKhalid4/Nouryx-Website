@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { useState, useEffect } from "react";
 import { Menu, X, Globe, ChevronDown, User, LogOut, Heart, Bell, MessageSquare, CalendarDays, Settings } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -36,20 +37,23 @@ export function Header() {
     { href: "/salons", label: t.nav.salons },
     { href: "/pricing", label: t.nav.pricing },
     { href: "/about", label: t.nav.about },
+    { href: "/contact", label: t.nav.contact },
   ];
 
   return (
-    <header className={`sticky top-0 z-50 w-full backdrop-blur-md  transition-colors duration-300 ${
-      isScrolled ? "bg-white/80 border-border/50" : "bg-transparent border-border/30"
-    }`}>
+    <header className={`sticky top-0 z-50 w-full backdrop-blur-md  transition-colors duration-300 ${isScrolled ? "bg-white/80 border-border/50" : "bg-transparent border-border/30"
+      }`}>
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="flex h-16 items-center justify-between">
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2">
-            <img
+            <Image
               src="/images/website-logo.png"
               alt="Nouryx"
+              width={140}
+              height={36}
               className="h-9 w-auto"
+              priority
             />
           </Link>
 
@@ -79,7 +83,7 @@ export function Header() {
             {isLoggedIn ? (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" size="sm" className="gap-2">
+                  <Button variant="ghost" size="sm" className="gap-2" aria-label="User menu">
                     <div className="h-7 w-7 rounded-full bg-[#C9AA8B] flex items-center justify-center">
                       <User className="h-4 w-4 text-white" />
                     </div>
@@ -160,7 +164,7 @@ export function Header() {
             </button>
             <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
               <SheetTrigger asChild>
-                <Button variant="ghost" size="icon" className="h-9 w-9">
+                <Button variant="ghost" size="icon" className="h-9 w-9" aria-label="Toggle mobile menu">
                   {mobileOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
                 </Button>
               </SheetTrigger>

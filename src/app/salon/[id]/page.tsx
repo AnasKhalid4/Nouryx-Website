@@ -10,6 +10,7 @@ import { mockSalons, mockCategories } from "@/data/mock-salons";
 import { useState } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
 
 export default function SalonDetailPage() {
   const { t } = useLocale();
@@ -66,10 +67,12 @@ export default function SalonDetailPage() {
         {/* Full-width Image Gallery */}
         <div className="relative w-full h-72 bg-[#1A1A1A] overflow-hidden">
           {/* Main Image */}
-          <img
+          <Image
             src={salon.shopImages[activeImage]}
             alt={salon.shopName}
-            className="w-full h-full object-cover"
+            fill
+            className="object-cover"
+            priority
           />
           {/* Nav arrows */}
           <button
@@ -90,9 +93,8 @@ export default function SalonDetailPage() {
               <button
                 key={i}
                 onClick={() => setActiveImage(i)}
-                className={`h-2.5 rounded-full transition-all ${
-                  i === activeImage ? "w-7 bg-white" : "w-2.5 bg-white/40"
-                }`}
+                className={`h-2.5 rounded-full transition-all ${i === activeImage ? "w-7 bg-white" : "w-2.5 bg-white/40"
+                  }`}
               />
             ))}
           </div>
@@ -122,9 +124,8 @@ export default function SalonDetailPage() {
               <div className="flex items-center gap-2 mb-6 overflow-x-auto pb-1">
                 <button
                   onClick={() => setActiveCategory(null)}
-                  className={`px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-colors ${
-                    !activeCategory ? "bg-foreground text-white" : "bg-white border border-border text-foreground hover:bg-muted"
-                  }`}
+                  className={`px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-colors ${!activeCategory ? "bg-foreground text-white" : "bg-white border border-border text-foreground hover:bg-muted"
+                    }`}
                 >
                   {t.salonDetailExtra.all}
                 </button>
@@ -132,9 +133,8 @@ export default function SalonDetailPage() {
                   <button
                     key={cat}
                     onClick={() => setActiveCategory(activeCategory === cat ? null : cat)}
-                    className={`px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-colors ${
-                      activeCategory === cat ? "bg-foreground text-white" : "bg-white border border-border text-foreground hover:bg-muted"
-                    }`}
+                    className={`px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-colors ${activeCategory === cat ? "bg-foreground text-white" : "bg-white border border-border text-foreground hover:bg-muted"
+                      }`}
                   >
                     {cat}
                   </button>
@@ -172,9 +172,8 @@ export default function SalonDetailPage() {
                         <Button
                           variant={isSelected ? "default" : "outline"}
                           size="sm"
-                          className={`rounded-lg text-xs h-9 px-5 ${
-                            isSelected ? "bg-[#C9AA8B] hover:bg-[#B8956F] text-white" : ""
-                          }`}
+                          className={`rounded-lg text-xs h-9 px-5 ${isSelected ? "bg-[#C9AA8B] hover:bg-[#B8956F] text-white" : ""
+                            }`}
                           onClick={(e) => { e.stopPropagation(); toggleService(service.id); }}
                         >
                           {isSelected ? t.salonDetailExtra.added : t.salonDetailExtra.book}

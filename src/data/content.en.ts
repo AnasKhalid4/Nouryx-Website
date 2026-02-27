@@ -5,6 +5,7 @@ export const content = {
     salons: "Salons",
     pricing: "Pricing",
     about: "About Us",
+    contact: "Contact Us",
     login: "Log in",
     signup: "Sign up",
     listBusiness: "List Your Business",
@@ -235,6 +236,29 @@ export const content = {
     },
   },
 
+  // Contact Page
+  contact: {
+    title: "Contact Us",
+    subtitle: "We'd love to hear from you",
+    getInTouch: "Get in Touch",
+    text: "Have a question, feedback, or need support? Our team is here to help you get the most out of Nouryx.",
+    form: {
+      name: "Full Name",
+      email: "Email Address",
+      subject: "Subject",
+      message: "Message",
+      send: "Send Message",
+      success: "Your message has been sent successfully. We will get back to you shortly.",
+      error: "An error occurred while sending your message. Please try again.",
+    },
+    info: {
+      title: "Contact Information",
+      email: "support@nouryx.com",
+      phone: "+33 1 23 45 67 89",
+      address: "123 Avenue des Champs-Élysées, 75008 Paris, France",
+    },
+  },
+
   // Auth
   auth: {
     login: {
@@ -446,7 +470,7 @@ export const content = {
       ],
     },
     profile: {
-      title: "Salon Profile",
+      title: "Profile",
       editBasic: "Edit Basic Info",
       editBusiness: "Edit Business Info",
       editImages: "Edit Shop Images",
