@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import { User, Heart, Bell, MessageSquare, Settings, ChevronRight, Pencil, LogOut, Loader2 } from "lucide-react";
 import { useLocale } from "@/hooks/use-locale";
 import { useAuth } from "@/hooks/use-auth";
@@ -22,8 +23,13 @@ export default function ProfilePage() {
     );
   }
 
+  useEffect(() => {
+    if (!isLoading && (!isLoggedIn || !user)) {
+      router.push("/login");
+    }
+  }, [isLoading, isLoggedIn, user, router]);
+
   if (!isLoggedIn || !user) {
-    router.push("/login");
     return null;
   }
 

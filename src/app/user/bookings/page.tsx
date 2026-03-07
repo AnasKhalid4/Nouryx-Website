@@ -11,7 +11,7 @@ import { useUserBookings, useCancelBooking } from "@/hooks/use-bookings";
 import { useSubmitReview } from "@/hooks/use-reviews";
 import { useAuth } from "@/hooks/use-auth";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { toast } from "sonner";
 import type { BookingModel } from "@/types/booking";
@@ -120,8 +120,13 @@ export default function BookingsPage() {
   const [reviewRating, setReviewRating] = useState(0);
   const [reviewComment, setReviewComment] = useState("");
 
+  useEffect(() => {
+    if (!isLoggedIn) {
+      router.push("/login");
+    }
+  }, [isLoggedIn, router]);
+
   if (!isLoggedIn) {
-    router.push("/login");
     return null;
   }
 
@@ -304,8 +309,8 @@ export default function BookingsPage() {
                     >
                       <Star
                         className={`h-8 w-8 transition-colors ${reviewRating >= star
-                            ? "fill-[#C9AA8B] text-[#C9AA8B]"
-                            : "fill-transparent text-gray-300"
+                          ? "fill-[#C9AA8B] text-[#C9AA8B]"
+                          : "fill-transparent text-gray-300"
                           }`}
                       />
                     </button>
