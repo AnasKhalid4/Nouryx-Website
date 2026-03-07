@@ -61,12 +61,6 @@ const nextConfig: NextConfig = {
   async redirects() {
     return [
       {
-        source: "/:path*",
-        has: [{ type: "host", value: "booking-nouryx.vercel.app" }],
-        destination: "https://nouryx.com/:path*",
-        permanent: true,
-      },
-      {
         source: "/:path+/",
         destination: "/:path+",
         permanent: true,
