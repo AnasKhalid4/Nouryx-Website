@@ -3,6 +3,7 @@ export const content = {
   nav: {
     home: "Accueil",
     salons: "Salons",
+    blog: "Blog",
     pricing: "Tarifs",
     about: "À propos",
     contact: "Contact",
@@ -414,6 +415,14 @@ export const content = {
     deleteConfirm: "Êtes-vous sûr de vouloir supprimer votre compte ? Cette action est irréversible.",
     logoutConfirm: "Êtes-vous sûr de vouloir vous déconnecter ?",
     manageSubscription: "Gérer l'abonnement",
+    deleteModal: {
+      title: "Supprimer le compte",
+      areYouSure: "Êtes-vous absolument sûr ?",
+      descClient: "Cette action est irréversible. Cela supprimera définitivement votre compte et effacera vos données de nos serveurs.",
+      descSalon: "Cette action est irréversible. Cela supprimera définitivement votre compte salon et effacera toutes vos données, y compris les réservations et les services, de nos serveurs.",
+      cancel: "Annuler",
+      confirm: "Confirmer la suppression",
+    }
   },
 
   // Notifications

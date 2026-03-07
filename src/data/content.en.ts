@@ -3,6 +3,7 @@ export const content = {
   nav: {
     home: "Home",
     salons: "Salons",
+    blog: "Blog",
     pricing: "Pricing",
     about: "About Us",
     contact: "Contact Us",
@@ -414,6 +415,14 @@ export const content = {
     deleteConfirm: "Are you sure you want to delete your account? This action cannot be undone.",
     logoutConfirm: "Are you sure you want to log out?",
     manageSubscription: "Manage Subscription",
+    deleteModal: {
+      title: "Delete Account",
+      areYouSure: "Are you absolutely sure?",
+      descClient: "This action cannot be undone. This will permanently delete your account and remove your data from our servers.",
+      descSalon: "This action cannot be undone. This will permanently delete your salon account and remove all your data, including bookings and services, from our servers.",
+      cancel: "Cancel",
+      confirm: "Confirm Delete",
+    }
   },
 
   // Notifications

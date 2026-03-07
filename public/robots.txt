@@ -1,0 +1,20 @@
+User-agent: *
+Allow: /
+
+# Block internal/admin/API routes
+Disallow: /api/
+Disallow: /admin/
+Disallow: /dashboard/
+Disallow: /_next/
+Disallow: /login
+Disallow: /signup/success
+
+# Allow bots to access static assets
+Allow: /_next/static/
+Allow: /images/
+
+# Sitemap location
+Sitemap: https://nouryx.com/sitemap.xml
+
+# Friendly crawl rate
+Crawl-delay: 1

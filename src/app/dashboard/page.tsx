@@ -1,27 +1,58 @@
 "use client";
 
-import { CalendarDays, TrendingUp, Star, DollarSign, Clock, User } from "lucide-react";
+import { CalendarDays, TrendingUp, Star, DollarSign, Clock, User, Loader2 } from "lucide-react";
 import { useLocale } from "@/hooks/use-locale";
-import { mockBookings } from "@/data/mock-salons";
+import { useAuth } from "@/hooks/use-auth";
+import { useSalonBookings } from "@/hooks/use-bookings";
 import Link from "next/link";
 
 export default function DashboardHomePage() {
   const { t } = useLocale();
+  const { user } = useAuth();
+  const { data: bookings, isLoading } = useSalonBookings();
+
+  const salon = user?.salon;
+  const ownerName = user?.profile.fullName || "Owner";
 
   const stats = [
-    { label: t.dashboard.stats.totalOrders, value: "1,240", icon: CalendarDays, color: "text-blue-600 bg-blue-50" },
-    { label: t.dashboard.stats.completed, value: "1,180", icon: TrendingUp, color: "text-emerald-600 bg-emerald-50" },
-    { label: t.dashboard.stats.rating, value: "4.9", icon: Star, color: "text-amber-600 bg-amber-50" },
-    { label: t.dashboard.stats.earnings, value: "€52,400", icon: DollarSign, color: "text-[#C9AA8B] bg-[#C9AA8B]/10" },
+    {
+      label: t.dashboard.stats.totalOrders,
+      value: salon?.totalOrders?.toLocaleString() || "0",
+      icon: CalendarDays,
+      color: "text-blue-600 bg-blue-50",
+    },
+    {
+      label: t.dashboard.stats.completed,
+      value: salon?.completedOrders?.toLocaleString() || "0",
+      icon: TrendingUp,
+      color: "text-emerald-600 bg-emerald-50",
+    },
+    {
+      label: t.dashboard.stats.rating,
+      value: salon?.rating?.toFixed(1) || "0.0",
+      icon: Star,
+      color: "text-amber-600 bg-amber-50",
+    },
+    {
+      label: t.dashboard.stats.earnings,
+      value: `€${salon?.totalEarnings?.toLocaleString() || "0"}`,
+      icon: DollarSign,
+      color: "text-[#C9AA8B] bg-[#C9AA8B]/10",
+    },
   ];
 
-  const todayBookings = mockBookings.filter((b) => b.status === "inprocess").slice(0, 4);
+  // Today's bookings
+  const today = new Date();
+  const todayStr = today.toISOString().split("T")[0];
+  const todayBookings = (bookings || [])
+    .filter((b) => b.status === "inprocess" && b.schedule.startAt.startsWith(todayStr))
+    .slice(0, 6);
 
   return (
     <div className="p-4 md:p-6 lg:p-10 max-w-7xl mx-auto w-full">
       <div className="mb-6 md:mb-8">
         <h1 className="text-xl md:text-2xl font-bold text-foreground">
-          {t.dashboard.welcome}, Marie 👋
+          {t.dashboard.welcome}, {ownerName} 👋
         </h1>
         <p className="text-xs md:text-sm text-muted-foreground mt-1">
           Here&apos;s what&apos;s happening with your salon today.
@@ -52,7 +83,11 @@ export default function DashboardHomePage() {
           </Link>
         </div>
 
-        {todayBookings.length > 0 ? (
+        {isLoading ? (
+          <div className="flex items-center justify-center py-8">
+            <Loader2 className="h-6 w-6 animate-spin text-[#C9AA8B]" />
+          </div>
+        ) : todayBookings.length > 0 ? (
           <div className="space-y-3">
             {todayBookings.map((booking) => (
               <div key={booking.bookingId} className="flex items-center gap-3 p-3 rounded-lg bg-[#FAFAF8]">

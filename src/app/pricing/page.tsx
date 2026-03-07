@@ -6,11 +6,13 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Check, ChevronDown, ChevronUp } from "lucide-react";
 import { useLocale } from "@/hooks/use-locale";
+import { useAuth } from "@/hooks/use-auth";
 import { useState } from "react";
 import Link from "next/link";
 
 export default function PricingPage() {
   const { t } = useLocale();
+  const { user } = useAuth();
   const [openFaq, setOpenFaq] = useState<number | null>(null);
 
   return (
@@ -58,7 +60,7 @@ export default function PricingPage() {
               </div>
 
               <div className="mt-8">
-                <Link href="/signup">
+                <Link href={user?.role === "salon" ? "/dashboard/subscription" : "/signup"}>
                   <Button className="w-full bg-[#C9AA8B] hover:bg-[#B8956F] text-white h-12 rounded-xl text-sm font-medium">
                     {t.pricing.cta}
                   </Button>

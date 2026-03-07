@@ -3,8 +3,9 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Header } from "@/components/layout/header";
-import { LayoutDashboard, CalendarDays, User, Scissors, Settings, CreditCard, MessageSquare } from "lucide-react";
+import { LayoutDashboard, CalendarDays, User, Scissors, Settings, CreditCard, MessageSquare, Bell } from "lucide-react";
 import { useLocale } from "@/hooks/use-locale";
+import { useAuth } from "@/hooks/use-auth";
 
 const sidebarItems = [
   { icon: LayoutDashboard, key: "title" as const, href: "/dashboard" },
@@ -12,6 +13,7 @@ const sidebarItems = [
   { icon: User, key: "profile" as const, href: "/dashboard/profile" },
   { icon: Scissors, key: "services" as const, href: "/dashboard/services" },
   { icon: MessageSquare, key: "chat" as const, href: "/chat" },
+  { icon: Bell, key: "notifications" as const, href: "/dashboard/notifications" },
   { icon: CreditCard, key: "subscription" as const, href: "/dashboard/subscription" },
   { icon: Settings, key: "settings" as const, href: "/dashboard/settings" },
 ];
@@ -19,6 +21,11 @@ const sidebarItems = [
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const { t } = useLocale();
+  const { user } = useAuth();
+
+  const salonName = user?.salon?.shopName || "My Salon";
+  const salonCity = user?.location?.city || "";
+  const salonInitial = salonName.charAt(0).toUpperCase();
 
   const labels: Record<string, string> = {
     title: t.dashboard.title,
@@ -26,6 +33,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     profile: t.dashboard.profile.title,
     services: t.dashboard.services.title,
     chat: t.chat.title,
+    notifications: t.notifications?.title || "Notifications",
     subscription: t.dashboard.subscription.title,
     settings: t.settings.title,
   };
@@ -46,11 +54,10 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                 <Link
                   key={item.href}
                   href={item.href}
-                  className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${
-                    isActive
-                      ? "bg-[#C9AA8B]/10 text-[#C9AA8B]"
-                      : "text-muted-foreground hover:bg-muted hover:text-foreground"
-                  }`}
+                  className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${isActive
+                    ? "bg-[#C9AA8B]/10 text-[#C9AA8B]"
+                    : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                    }`}
                 >
                   <item.icon className="h-4 w-4" />
                   {labels[item.key]}
@@ -63,11 +70,11 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           <div className="p-4 border-t border-border">
             <div className="flex items-center gap-3">
               <div className="h-9 w-9 rounded-lg bg-[#C9AA8B] flex items-center justify-center">
-                <span className="text-white font-bold text-sm">É</span>
+                <span className="text-white font-bold text-sm">{salonInitial}</span>
               </div>
               <div className="min-w-0">
-                <p className="text-sm font-medium text-foreground truncate">Élégance Coiffure</p>
-                <p className="text-xs text-muted-foreground">Paris</p>
+                <p className="text-sm font-medium text-foreground truncate">{salonName}</p>
+                {salonCity && <p className="text-xs text-muted-foreground">{salonCity}</p>}
               </div>
             </div>
           </div>
@@ -85,9 +92,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                 <Link
                   key={item.href}
                   href={item.href}
-                  className={`flex flex-col items-center gap-0.5 px-3 py-1 ${
-                    isActive ? "text-[#C9AA8B]" : "text-muted-foreground"
-                  }`}
+                  className={`flex flex-col items-center gap-0.5 px-3 py-1 ${isActive ? "text-[#C9AA8B]" : "text-muted-foreground"
+                    }`}
                 >
                   <item.icon className="h-5 w-5" />
                   <span className="text-[10px] font-medium">{labels[item.key]}</span>

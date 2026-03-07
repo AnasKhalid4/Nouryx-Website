@@ -1,14 +1,87 @@
 "use client";
 
+import { useState, useEffect } from "react";
+import { useSearchParams, useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Check, CreditCard, Sparkles } from "lucide-react";
+import { Check, CreditCard, Sparkles, Loader2 } from "lucide-react";
 import { useLocale } from "@/hooks/use-locale";
+import { useAuth } from "@/hooks/use-auth";
+import { useMutation } from "@tanstack/react-query";
+import { toast } from "sonner";
+import { Suspense } from "react";
 
-export default function DashboardSubscriptionPage() {
+function SubscriptionContent() {
   const { t } = useLocale();
+  const { user, uid } = useAuth();
+  const searchParams = useSearchParams();
+  const router = useRouter();
 
-  const isActive = false;
+  const isActive = user?.subscription?.active ?? false;
+  // Note: status is not in UserSubscription type, removing that check. Active + Trial logic is enough.
+  const isTrial = user?.subscription?.freeTrial?.used === true && user?.subscription?.freeTrial?.durationMonths > 0;
+
+  // Show toast on return from Stripe Checkout
+  useEffect(() => {
+    if (searchParams.get("success") === "true") {
+      toast.success("Subscription activated successfully!");
+      // Clean up URL
+      router.replace("/dashboard/subscription");
+    }
+    if (searchParams.get("cancelled") === "true") {
+      toast.error("Checkout was cancelled.");
+      // Clean up URL
+      router.replace("/dashboard/subscription");
+    }
+  }, [searchParams, router]);
+
+  const checkoutMutation = useMutation({
+    mutationFn: async () => {
+      if (!uid || !user?.profile?.email) throw new Error("Not logged in");
+
+      const res = await fetch("/api/stripe/create-checkout", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          salonId: uid,
+          email: user.profile.email,
+        }),
+      });
+
+      if (!res.ok) throw new Error("Failed to create checkout session");
+      const { url } = await res.json();
+      return url as string;
+    },
+    onSuccess: (url) => {
+      window.location.href = url;
+    },
+    onError: () => {
+      toast.error("Could not start checkout. Please try again later.");
+    }
+  });
+
+  const portalMutation = useMutation({
+    mutationFn: async () => {
+      const stripeCustomerId = user?.subscription?.stripeCustomerId;
+      if (!stripeCustomerId) throw new Error("No connected Stripe account");
+
+      const res = await fetch("/api/stripe/create-portal", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ stripeCustomerId }),
+      });
+
+      if (!res.ok) throw new Error("Failed to create portal session");
+      const { url } = await res.json();
+      return url as string;
+    },
+    onSuccess: (url) => {
+      window.location.href = url;
+    },
+    onError: () => {
+      toast.error("Could not load billing portal. Please try again later.");
+    }
+  });
 
   return (
     <div className="p-4 md:p-6 lg:p-10 max-w-3xl mx-auto w-full">
@@ -23,7 +96,7 @@ export default function DashboardSubscriptionPage() {
             </div>
             <div>
               <p className="text-sm font-semibold text-foreground">{t.dashboard.subscription.currentPlan}</p>
-              <p className="text-xs text-muted-foreground">Professional</p>
+              <p className="text-xs text-muted-foreground">{isTrial ? "Professional (Trial)" : "Professional"}</p>
             </div>
           </div>
           <Badge
@@ -35,7 +108,13 @@ export default function DashboardSubscriptionPage() {
         </div>
 
         {isActive ? (
-          <Button variant="outline" className="w-full rounded-lg">
+          <Button
+            variant="outline"
+            className="w-full rounded-lg"
+            onClick={() => portalMutation.mutate()}
+            disabled={portalMutation.isPending}
+          >
+            {portalMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
             {t.dashboard.subscription.manage}
           </Button>
         ) : null}
@@ -71,11 +150,24 @@ export default function DashboardSubscriptionPage() {
             ))}
           </ul>
 
-          <Button className="w-full bg-[#C9AA8B] hover:bg-[#B8956F] text-white h-10 md:h-12 rounded-xl font-medium text-sm">
+          <Button
+            className="w-full bg-[#C9AA8B] hover:bg-[#B8956F] text-white h-10 md:h-12 rounded-xl font-medium text-sm"
+            onClick={() => checkoutMutation.mutate()}
+            disabled={checkoutMutation.isPending}
+          >
+            {checkoutMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
             {t.dashboard.subscription.upgrade}
           </Button>
         </div>
       )}
     </div>
+  );
+}
+
+export default function DashboardSubscriptionPage() {
+  return (
+    <Suspense fallback={<div className="p-10 flex justify-center"><Loader2 className="h-6 w-6 animate-spin text-muted-foreground" /></div>}>
+      <SubscriptionContent />
+    </Suspense>
   );
 }

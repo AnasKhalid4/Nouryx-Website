@@ -1,14 +1,13 @@
 "use client";
 
-import { Header } from "@/components/layout/header";
-import { Footer } from "@/components/layout/footer";
-import { Bell, CalendarDays } from "lucide-react";
+import { Bell, CalendarDays, Loader2 } from "lucide-react";
 import { useLocale } from "@/hooks/use-locale";
-import { mockNotifications } from "@/data/mock-salons";
+import { useNotifications, useUnreadCount, useMarkAsRead, useMarkAllRead } from "@/hooks/use-notifications";
 
-function timeAgo(dateStr: string) {
-  const diff = Date.now() - new Date(dateStr).getTime();
+function timeAgo(date: Date) {
+  const diff = Date.now() - date.getTime();
   const mins = Math.floor(diff / 60000);
+  if (mins < 1) return "just now";
   if (mins < 60) return `${mins}m ago`;
   const hrs = Math.floor(mins / 60);
   if (hrs < 24) return `${hrs}h ago`;
@@ -17,35 +16,55 @@ function timeAgo(dateStr: string) {
 
 export default function NotificationsPage() {
   const { t } = useLocale();
+  const { data: notifications, isLoading } = useNotifications();
+  const unreadCount = useUnreadCount();
+  const markAsRead = useMarkAsRead();
+  const markAllRead = useMarkAllRead();
 
   return (
-    <div className="min-h-screen bg-background">
-      <Header />
-      <main className="py-8 lg:py-12">
+    <main className="py-8 lg:py-12">
         <div className="mx-auto max-w-2xl px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between mb-6">
-            <h1 className="text-2xl font-bold text-foreground">
-              {t.notifications.title}
-            </h1>
-            <button className="text-xs text-[#C9AA8B] hover:text-[#B8956F] font-medium">
-              {t.notifications.markAllRead}
-            </button>
+            <div className="flex items-center gap-3">
+              <h1 className="text-2xl font-bold text-foreground">
+                {t.notifications.title}
+              </h1>
+              {unreadCount > 0 && (
+                <span className="text-xs bg-[#C9AA8B] text-white rounded-full px-2 py-0.5 font-medium">
+                  {unreadCount}
+                </span>
+              )}
+            </div>
+            {unreadCount > 0 && (
+              <button
+                onClick={() => markAllRead.mutate()}
+                disabled={markAllRead.isPending}
+                className="text-xs text-[#C9AA8B] hover:text-[#B8956F] font-medium disabled:opacity-50"
+              >
+                {markAllRead.isPending ? "Marking..." : t.notifications.markAllRead}
+              </button>
+            )}
           </div>
 
-          {mockNotifications.length > 0 ? (
+          {isLoading ? (
+            <div className="flex items-center justify-center py-20">
+              <Loader2 className="h-8 w-8 animate-spin text-[#C9AA8B]" />
+            </div>
+          ) : notifications && notifications.length > 0 ? (
             <div className="space-y-2">
-              {mockNotifications.map((notif) => (
-                <div
+              {notifications.map((notif) => (
+                <button
                   key={notif.id}
-                  className={`flex gap-3 p-4 rounded-xl border transition-colors cursor-pointer ${
-                    notif.isRead
-                      ? "bg-white border-border/50"
-                      : "bg-[#C9AA8B]/5 border-[#C9AA8B]/20"
-                  }`}
+                  onClick={() => {
+                    if (!notif.isRead) markAsRead.mutate(notif.id);
+                  }}
+                  className={`w-full text-left flex gap-3 p-4 rounded-xl border transition-colors cursor-pointer ${notif.isRead
+                      ? "bg-white border-border/50 hover:bg-muted/30"
+                      : "bg-[#C9AA8B]/5 border-[#C9AA8B]/20 hover:bg-[#C9AA8B]/10"
+                    }`}
                 >
-                  <div className={`h-10 w-10 rounded-full flex items-center justify-center shrink-0 ${
-                    notif.isRead ? "bg-muted" : "bg-[#C9AA8B]/10"
-                  }`}>
+                  <div className={`h-10 w-10 rounded-full flex items-center justify-center shrink-0 ${notif.isRead ? "bg-muted" : "bg-[#C9AA8B]/10"
+                    }`}>
                     {notif.type === "order" ? (
                       <CalendarDays className={`h-4 w-4 ${notif.isRead ? "text-muted-foreground" : "text-[#C9AA8B]"}`} />
                     ) : (
@@ -54,7 +73,7 @@ export default function NotificationsPage() {
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-start justify-between gap-2">
-                      <p className={`text-sm font-medium ${notif.isRead ? "text-foreground" : "text-foreground"}`}>
+                      <p className={`text-sm ${notif.isRead ? "font-normal" : "font-semibold"} text-foreground`}>
                         {notif.title}
                       </p>
                       <span className="text-[10px] text-muted-foreground shrink-0 mt-0.5">
@@ -68,7 +87,7 @@ export default function NotificationsPage() {
                   {!notif.isRead && (
                     <div className="h-2 w-2 rounded-full bg-[#C9AA8B] shrink-0 mt-2" />
                   )}
-                </div>
+                </button>
               ))}
             </div>
           ) : (
@@ -78,8 +97,6 @@ export default function NotificationsPage() {
             </div>
           )}
         </div>
-      </main>
-      <Footer />
-    </div>
+    </main>
   );
 }
