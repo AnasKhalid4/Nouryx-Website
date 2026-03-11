@@ -94,6 +94,26 @@ export default function BookingDetailPage() {
                     </div>
                 </div>
 
+                {/* Team Member / Specialist */}
+                {booking.team_member && booking.team_member.memberId && (
+                    <div className="bg-white rounded-2xl border border-border/50 p-5 mb-4">
+                        <h3 className="text-sm font-semibold text-foreground mb-3">Specialist</h3>
+                        <div className="flex items-center gap-3">
+                            <div className="h-10 w-10 rounded-full bg-[#E8D5C0] flex items-center justify-center overflow-hidden">
+                                {booking.team_member.image ? (
+                                    <img src={booking.team_member.image} alt={booking.team_member.name} className="h-10 w-10 rounded-full object-cover" />
+                                ) : (
+                                    <span className="text-sm font-bold text-[#8B7355]">{booking.team_member.name.charAt(0)}</span>
+                                )}
+                            </div>
+                            <div>
+                                <p className="text-sm font-medium text-foreground">{booking.team_member.name}</p>
+                                <p className="text-xs text-muted-foreground">{booking.team_member.role}</p>
+                            </div>
+                        </div>
+                    </div>
+                )}
+
                 {/* Date & Time */}
                 <div className="bg-white rounded-2xl border border-border/50 p-5 mb-4 space-y-3">
                     <h3 className="text-sm font-semibold text-foreground">Schedule</h3>

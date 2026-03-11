@@ -1,0 +1,2 @@
+﻿src/app/dashboard/team-members/page.tsx(258,23): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?
+src/app/dashboard/team-members/page.tsx(260,14): error TS1005: ':' expected.

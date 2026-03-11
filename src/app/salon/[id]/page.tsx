@@ -4,12 +4,14 @@ import { Header } from "@/components/layout/header";
 import { Footer } from "@/components/layout/footer";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Star, MapPin, Heart, Share2, MessageSquare, ExternalLink, Clock, ChevronLeft, ChevronRight, Loader2 } from "lucide-react";
+import { Star, MapPin, Heart, Share2, MessageSquare, ExternalLink, Clock, ChevronLeft, ChevronRight, Loader2, Users } from "lucide-react";
 import { useLocale } from "@/hooks/use-locale";
 import { useSalonDetail, useSalonServices } from "@/hooks/use-salons";
 import { useSalonReviews } from "@/hooks/use-reviews";
 import { useIsFavorite, useToggleFavorite } from "@/hooks/use-favorites";
 import { useCategories } from "@/hooks/use-categories";
+import { useTeamMembers } from "@/hooks/use-team-members";
+import { useWeeklySchedule } from "@/hooks/use-schedule";
 import { useAuth } from "@/hooks/use-auth";
 import { useCreateConversation } from "@/hooks/use-chat";
 import { useBookingStore } from "@/stores/booking-store";
@@ -34,6 +36,8 @@ export default function SalonDetailPage() {
   const toggleFav = useToggleFavorite();
   const createConversation = useCreateConversation();
   const { setSalon, toggleService: bookingToggleService, selectedServices, clearBooking } = useBookingStore();
+  const { data: teamMembers } = useTeamMembers(salonId);
+  const { data: weeklySchedule } = useWeeklySchedule(salonId);
   const [startingChat, setStartingChat] = useState(false);
 
 
@@ -230,6 +234,55 @@ export default function SalonDetailPage() {
                       );
                     })
                   )}
+                </div>
+              )}
+
+              {/* Team Members */}
+              {teamMembers && teamMembers.length > 0 && (
+                <div className="mt-12">
+                  <h2 className="text-xl font-bold text-foreground mb-5 flex items-center gap-2">
+                    <Users className="h-5 w-5" />
+                    {t.dashboard.teamMembers.title}
+                  </h2>
+                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+                    {teamMembers.map((member) => (
+                      <div key={member.id} className="flex flex-col items-center gap-2 p-4 rounded-xl bg-[#FDFBF9] border border-border/30 hover:border-[#C9AA8B]/40 transition-colors">
+                        <div className="h-16 w-16 rounded-full bg-[#E8D5C0] flex items-center justify-center overflow-hidden">
+                          {member.image ? (
+                            <Image src={member.image} alt={member.name} width={64} height={64} className="object-cover rounded-full" />
+                          ) : (
+                            <span className="text-lg font-bold text-[#8B7355]">{member.name.charAt(0)}</span>
+                          )}
+                        </div>
+                        <p className="text-sm font-medium text-foreground text-center">{member.name}</p>
+                        <p className="text-xs text-muted-foreground">{member.role}</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Opening Hours */}
+              {weeklySchedule && Object.keys(weeklySchedule.schedule).length > 0 && (
+                <div className="mt-12">
+                  <h2 className="text-xl font-bold text-foreground mb-5 flex items-center gap-2">
+                    <Clock className="h-5 w-5" />
+                    {t.dashboard.teamMembers.workingHours}
+                  </h2>
+                  <div className="space-y-2">
+                    {["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"].map((day) => {
+                      const ranges = weeklySchedule.schedule[day];
+                      const isClosed = !ranges || ranges.length === 0 || ranges[0]?.start === "closed";
+                      return (
+                        <div key={day} className="flex items-center justify-between py-2.5 px-4 rounded-lg odd:bg-[#FDFBF9]">
+                          <span className="text-sm font-medium text-foreground capitalize">{t.dashboard.schedule.days[day as keyof typeof t.dashboard.schedule.days]}</span>
+                          <span className={`text-sm ${isClosed ? "text-red-400" : "text-muted-foreground"}`}>
+                            {isClosed ? t.dashboard.schedule.closed : ranges!.map(r => `${r.start} – ${r.end}`).join(", ")}
+                          </span>
+                        </div>
+                      );
+                    })}
+                  </div>
                 </div>
               )}
 

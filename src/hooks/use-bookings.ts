@@ -9,6 +9,7 @@ import {
     fetchBookingById,
     createBooking,
     updateBookingStatus,
+    fetchMemberBookedSlots,
 } from "@/lib/firebase/firestore";
 import { sendUserNotification } from "@/lib/notifications";
 import { queryKeys } from "@/lib/query-keys";
@@ -88,6 +89,15 @@ function parseBooking(data: Record<string, unknown>): BookingModel {
                 reviewedAt: review.reviewedAt ? parseDate(review.reviewedAt) : null,
             }
             : null,
+        team_member: (() => {
+            const tm = data.team_member as Record<string, unknown> | undefined;
+            return tm ? {
+                memberId: (tm.memberId as string) || "",
+                name: (tm.name as string) || "",
+                image: (tm.image as string) || "",
+                role: (tm.role as string) || "",
+            } : { memberId: "", name: "", image: "", role: "" };
+        })(),
         cancelReason: data.cancelReason as string | undefined,
         cancelledBy: data.cancelledBy as string | undefined,
         cancelledAt: data.cancelledAt ? parseDate(data.cancelledAt) : undefined,
@@ -285,5 +295,26 @@ export function useCompleteBooking() {
                 queryKey: queryKeys.bookings.all,
             });
         },
+    });
+}
+
+/**
+ * Fetch booked/disabled slots for a specific team member on a date.
+ * Returns Record<string, boolean> where keys are time strings like "09:00".
+ */
+export function useMemberBookedSlots(
+    salonId: string | undefined,
+    memberId: string | undefined,
+    dateStr: string | undefined
+) {
+    return useQuery({
+        queryKey: queryKeys.memberSlots.byMemberDate(
+            salonId || "",
+            memberId || "",
+            dateStr || ""
+        ),
+        queryFn: () => fetchMemberBookedSlots(salonId!, memberId!, dateStr!),
+        enabled: !!salonId && !!memberId && !!dateStr,
+        staleTime: 1000 * 30, // 30 seconds — slots change frequently
     });
 }

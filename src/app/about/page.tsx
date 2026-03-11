@@ -20,7 +20,7 @@ export default function AboutPage() {
           <div
             className="absolute inset-0 bg-cover bg-center bg-no-repeat"
             style={{
-              backgroundImage: "url('/images/about-us.png')",
+              backgroundImage: "url('-us.png')",
             }}
           />
           {/* Overlay */}

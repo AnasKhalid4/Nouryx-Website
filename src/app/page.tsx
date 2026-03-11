@@ -51,35 +51,7 @@ export default function HomePage() {
         <StatsSection />
         <ReviewsSection />
 
-        {/* FAQ Section — SEO rich results */}
-        <section className="py-16 lg:py-20 bg-white">
-          <div className="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
-            <h2 className="text-2xl md:text-3xl font-bold text-center text-foreground mb-3">
-              {locale === "fr" ? "Questions fréquentes" : "Frequently Asked Questions"}
-            </h2>
-            <p className="text-center text-muted-foreground mb-10 max-w-xl mx-auto">
-              {locale === "fr"
-                ? "Tout ce que vous devez savoir sur Nouryx et la réservation en ligne."
-                : "Everything you need to know about Nouryx and online booking."}
-            </p>
-            <div className="space-y-3">
-              {faqs.map((faq) => (
-                <details
-                  key={faq.question}
-                  className="group bg-[#FAFAF8] rounded-xl border border-border/50 overflow-hidden"
-                >
-                  <summary className="flex items-center justify-between px-5 py-4 cursor-pointer hover:bg-muted/30 transition-colors text-sm font-medium text-foreground">
-                    {faq.question}
-                    <ChevronDown className="h-4 w-4 text-muted-foreground shrink-0 ml-3 group-open:rotate-180 transition-transform" />
-                  </summary>
-                  <div className="px-5 pb-4 text-sm text-muted-foreground leading-relaxed">
-                    {faq.answer}
-                  </div>
-                </details>
-              ))}
-            </div>
-          </div>
-        </section>
+    
 
         <DownloadAppSection />
       </main>

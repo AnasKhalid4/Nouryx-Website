@@ -11,15 +11,29 @@ export default function ContactPage() {
     const [formData, setFormData] = useState({ name: "", email: "", subject: "", message: "" });
     const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setStatus("loading");
-        // Simulate API call
-        setTimeout(() => {
-            setStatus("success");
-            setFormData({ name: "", email: "", subject: "", message: "" });
+
+        try {
+            const res = await fetch("/api/contact", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(formData),
+            });
+
+            if (res.ok) {
+                setStatus("success");
+                setFormData({ name: "", email: "", subject: "", message: "" });
+            } else {
+                setStatus("error");
+            }
+        } catch (error) {
+            console.error("Contact form error:", error);
+            setStatus("error");
+        } finally {
             setTimeout(() => setStatus("idle"), 5000);
-        }, 1500);
+        }
     };
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {

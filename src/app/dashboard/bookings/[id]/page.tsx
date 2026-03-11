@@ -50,6 +50,33 @@ export default function BookingDetailPage() {
 
         <Separator />
 
+        {/* Team Member / Specialist */}
+        {(() => {
+          const tm = (booking as Record<string, unknown>).team_member as { memberId?: string; name?: string; image?: string; role?: string } | undefined;
+          if (!tm?.memberId) return null;
+          return (
+            <>
+              <div>
+                <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-2">Specialist</p>
+                <div className="flex items-center gap-3">
+                  <div className="h-10 w-10 rounded-full bg-[#E8D5C0] flex items-center justify-center overflow-hidden">
+                    {tm.image ? (
+                      <img src={tm.image} alt={tm.name || ""} className="h-10 w-10 rounded-full object-cover" />
+                    ) : (
+                      <span className="text-sm font-bold text-[#8B7355]">{(tm.name || "?").charAt(0)}</span>
+                    )}
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-foreground">{tm.name}</p>
+                    <p className="text-xs text-muted-foreground">{tm.role}</p>
+                  </div>
+                </div>
+              </div>
+              <Separator />
+            </>
+          );
+        })()}
+
         {/* Schedule */}
         <div>
           <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-2">Schedule</p>

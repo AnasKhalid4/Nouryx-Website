@@ -1,53 +1,64 @@
 "use client";
 
-import { Footer } from "@/components/layout/footer";
+import { useState, useMemo, useEffect } from "react";
 import { Header } from "@/components/layout/header";
-import { useLocale } from "@/hooks/use-locale";
-import { useAuth } from "@/hooks/use-auth";
-import { useBookingStore } from "@/stores/booking-store";
-import { useCreateBooking } from "@/hooks/use-bookings";
-import { fetchBookedSlots } from "@/lib/firebase/firestore";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Footer } from "@/components/layout/footer";
 import { Button } from "@/components/ui/button";
-import { useState, useCallback, useEffect } from "react";
+import {
+  ChevronLeft,
+  ChevronRight,
+  Loader2,
+  Clock,
+  Users,
+  Calendar as CalendarIcon,
+  CheckCircle2,
+  AlertCircle,
+  MapPin,
+  Check,
+} from "lucide-react";
+import { useLocale } from "@/hooks/use-locale";
+import { useBookingStore } from "@/stores/booking-store";
+import { useAuth } from "@/hooks/use-auth";
+import { useCreateBooking, useMemberBookedSlots } from "@/hooks/use-bookings";
+import { useTeamMembers } from "@/hooks/use-team-members";
+import { useWeeklySchedule } from "@/hooks/use-schedule";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import { Loader2, BellRing } from "lucide-react";
+import Image from "next/image";
+import {
+  generateBookingSlots,
+  getWeekdayKey,
+  isSlotPast,
+  isSlotDisabled,
+} from "@/lib/slot-utils";
 
-const TIME_SLOTS = [
-  "09:00", "10:00", "11:00", "12:00", "13:00", "14:00", "15:00", "16:00", "17:00", "18:00",
-];
+type BookingStep = "team_member" | "date_time" | "summary";
 
-const DAY_HEADERS = ["MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"];
-
-function getDaysInMonth(year: number, month: number) {
-  const firstDay = new Date(year, month, 1).getDay();
-  const daysInMonth = new Date(year, month + 1, 0).getDate();
-  const offset = firstDay === 0 ? 6 : firstDay - 1;
+function generateCalendarDays(year: number, month: number) {
+  const firstDay = new Date(year, month, 1);
+  const lastDay = new Date(year, month + 1, 0);
+  const startDayOfWeek = firstDay.getDay();
+  const daysInMonth = lastDay.getDate();
   const days: (number | null)[] = [];
-  for (let i = 0; i < offset; i++) days.push(null);
+  for (let i = 0; i < startDayOfWeek; i++) days.push(null);
   for (let d = 1; d <= daysInMonth; d++) days.push(d);
   return days;
-}
-
-function formatMonthYear(year: number, month: number) {
-  return new Date(year, month)
-    .toLocaleString("default", { month: "long", year: "numeric" })
-    .toUpperCase();
 }
 
 export default function BookingPage() {
   const { t } = useLocale();
   const router = useRouter();
-  const { uid, user } = useAuth();
+  const { isLoggedIn, uid, user } = useAuth();
   const createBooking = useCreateBooking();
 
   const {
     salon,
     selectedServices,
+    selectedTeamMember,
     selectedDate,
     selectedTime,
     notes,
+    setTeamMember,
     setDate,
     setTime,
     setNotes,
@@ -56,441 +67,508 @@ export default function BookingPage() {
     totalMinutes,
   } = useBookingStore();
 
+  const salonId = salon?.uid;
+  const { data: teamMembers, isLoading: membersLoading } = useTeamMembers(salonId);
+  const { data: weeklySchedule } = useWeeklySchedule(salonId);
+
+  const [step, setStep] = useState<BookingStep>("team_member");
+  const [showConfirmation, setShowConfirmation] = useState(false);
+
   const today = new Date();
-  const [month, setMonth] = useState(today.getMonth());
-  const [year, setYear] = useState(today.getFullYear());
-  const [selectedDay, setSelectedDay] = useState<number | null>(null);
-  const [localTime, setLocalTime] = useState<string | null>(null);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [bookedSlots, setBookedSlots] = useState<string[]>([]);
-  const [loadingSlots, setLoadingSlots] = useState(false);
-  const [notifyPopup, setNotifyPopup] = useState<string | null>(null);
+  const [calMonth, setCalMonth] = useState(today.getMonth());
+  const [calYear, setCalYear] = useState(today.getFullYear());
 
-  const days = getDaysInMonth(year, month);
+  const dateStr = useMemo(() => {
+    if (!selectedDate) return undefined;
+    const d = new Date(selectedDate);
+    const yyyy = d.getFullYear().toString().padStart(4, "0");
+    const mm = (d.getMonth() + 1).toString().padStart(2, "0");
+    const dd = d.getDate().toString().padStart(2, "0");
+    return `${yyyy}-${mm}-${dd}`;
+  }, [selectedDate]);
 
-  const isPast = (d: number) => {
-    const date = new Date(year, month, d);
-    const t = new Date(); t.setHours(0, 0, 0, 0);
-    return date < t;
-  };
+  const { data: disabledSlots } = useMemberBookedSlots(salonId, selectedTeamMember?.id, dateStr);
 
-  const isToday = (d: number) =>
-    d === today.getDate() && month === today.getMonth() && year === today.getFullYear();
+  const eligibleMembers = useMemo(() => {
+    if (!teamMembers || !selectedServices.length) return [];
+    const selectedServiceIds = selectedServices.map((s) => s.id);
+    return teamMembers.filter((member) =>
+      selectedServiceIds.some((sid) => member.serviceIds.includes(sid))
+    );
+  }, [teamMembers, selectedServices]);
 
-  const prevMonth = () => {
-    if (month === 0) { setMonth(11); setYear((y) => y - 1); }
-    else setMonth((m) => m - 1);
-    setSelectedDay(null); setLocalTime(null);
-  };
-  const nextMonth = () => {
-    if (month === 11) { setMonth(0); setYear((y) => y + 1); }
-    else setMonth((m) => m + 1);
-    setSelectedDay(null); setLocalTime(null);
-  };
+  const availableSlots = useMemo(() => {
+    if (!selectedDate || !selectedTeamMember || !weeklySchedule) return [];
+    const dateObj = new Date(selectedDate);
+    const dayKey = getWeekdayKey(dateObj);
+    const salonRanges = weeklySchedule.schedule[dayKey];
+    const memberRanges = selectedTeamMember.schedule[dayKey];
+    const duration = totalMinutes();
+    return generateBookingSlots(salonRanges, memberRanges, duration);
+  }, [selectedDate, selectedTeamMember, weeklySchedule, totalMinutes]);
 
-  const toLocalDateStr = (y: number, m: number, d: number) => {
-    const yy = y.toString().padStart(4, "0");
-    const mm = (m + 1).toString().padStart(2, "0");
-    const dd = d.toString().padStart(2, "0");
-    return `${yy}-${mm}-${dd}`;
-  };
-
-  const handleDaySelect = (day: number) => {
-    const newDay = day === selectedDay ? null : day;
-    setSelectedDay(newDay);
-    setLocalTime(null);
-    if (newDay) {
-      const dateStr = toLocalDateStr(year, month, newDay);
-      setDate(dateStr);
-    }
-  };
-
-  // Fetch booked slots when date changes
   useEffect(() => {
-    if (!selectedDay || !salon?.uid) {
-      setBookedSlots([]);
-      return;
+    if (!salon || selectedServices.length === 0) {
+      router.push("/");
     }
-    const dateStr = toLocalDateStr(year, month, selectedDay);
-    setLoadingSlots(true);
-    fetchBookedSlots(salon.uid, dateStr)
-      .then(setBookedSlots)
-      .catch(() => setBookedSlots([]))
-      .finally(() => setLoadingSlots(false));
-  }, [selectedDay, year, month, salon?.uid]);
+  }, [salon, selectedServices, router]);
 
-  const handleTimeSelect = (slot: string) => {
-    const newTime = slot === localTime ? null : slot;
-    setLocalTime(newTime);
-    if (newTime) setTime(newTime);
-  };
-
-  const monthName = new Date(year, month).toLocaleString("default", { month: "long", year: "numeric" });
-  const selectedLabel = selectedDay
-    ? new Date(year, month, selectedDay)
-      .toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })
-      .toUpperCase()
-    : null;
-
-  const price = totalPrice();
-  const duration = totalMinutes();
-
-  // If no salon or services selected, redirect back
   if (!salon || selectedServices.length === 0) {
     return (
-      <>
+      <div className="min-h-screen bg-background">
         <Header />
-        <div className="min-h-screen bg-[#FAF8F5] flex flex-col items-center justify-center px-4">
-          <p className="text-lg font-medium text-foreground mb-2">No services selected</p>
-          <p className="text-sm text-muted-foreground mb-6">Please select services from a salon first.</p>
-          <button
-            onClick={() => router.push("/salons")}
-            className="px-6 py-3 bg-[#C9AA8B] text-white rounded-lg font-medium hover:bg-[#B8956F] transition-colors"
-          >
-            Browse Salons
-          </button>
+        <div className="flex items-center justify-center py-40">
+          <Loader2 className="h-10 w-10 animate-spin text-[#C9AA8B]" />
         </div>
         <Footer />
-      </>
+      </div>
     );
   }
 
-  const handleConfirm = async () => {
-    if (!selectedDay || !localTime || !uid || !user || !salon) return;
+  const handleConfirmBooking = async () => {
+    if (!uid || !user || !selectedTeamMember || !selectedDate || !selectedTime) return;
 
-    const dateStr = toLocalDateStr(year, month, selectedDay);
-    const startAt = `${dateStr}T${localTime}:00`;
-    const endMinutes = duration;
-    const startDate = new Date(startAt);
-    const endDate = new Date(startDate.getTime() + endMinutes * 60 * 1000);
-    const endAt = endDate.toISOString();
+    const startDate = new Date(selectedDate);
+    const [h, m] = selectedTime.split(":").map(Number);
+    startDate.setHours(h, m, 0, 0);
 
-    const bookingId = `bk_${Date.now()}_${uid.slice(0, 6)}`;
+    const duration = totalMinutes();
+    const endDate = new Date(startDate.getTime() + duration * 60000);
+    const bookingId = `${uid}_${Date.now()}`;
 
-    // Check autoAcceptBooking
-    const autoAccept = salon.autoAcceptBooking === 1;
-
-    setIsSubmitting(true);
+    const bookingData = {
+      bookingId,
+      status: salon.autoAcceptBooking === 1 ? "inprocess" : "pending",
+      salon: {
+        salonId: salon.uid, shopName: salon.shopName, city: salon.city,
+        address: salon.address, country: salon.country, lat: salon.lat,
+        lng: salon.lng, placeId: salon.placeId,
+        owner: {
+          fullName: salon.owner.fullName, phoneNumber: salon.owner.phoneNumber,
+          email: salon.owner.email, profileImage: salon.owner.profileImage,
+        },
+      },
+      user: {
+        userId: uid, fullName: user.profile?.fullName || "",
+        phoneNumber: user.profile?.phoneNumber || "",
+        profileImage: user.profile?.profileImage || "",
+      },
+      services: selectedServices.map((s) => ({
+        serviceId: s.id, name: s.name, categoryId: s.categoryId,
+        providerId: s.providerId, minutes: s.minutes, price: s.price,
+      })),
+      schedule: { startAt: startDate.toISOString(), endAt: endDate.toISOString(), durationMinutes: duration },
+      pricing: { total: totalPrice(), currency: "EUR" },
+      team_member: {
+        memberId: selectedTeamMember.id, name: selectedTeamMember.name,
+        image: selectedTeamMember.image, role: selectedTeamMember.role,
+      },
+      notes: notes || null,
+    };
 
     try {
-      await createBooking.mutateAsync({
-        bookingId,
-        salonId: salon.uid,
-        bookingData: {
-          bookingId,
-          status: autoAccept ? "inprocess" : "pending",
-          salon: {
-            salonId: salon.uid,
-            shopName: salon.shopName,
-            city: salon.city || "",
-            address: salon.address || "",
-            country: salon.country || "",
-            lat: salon.lat || 0,
-            lng: salon.lng || 0,
-            placeId: salon.placeId || "",
-            owner: {
-              fullName: salon.owner?.fullName || "",
-              phoneNumber: salon.owner?.phoneNumber || "",
-              email: salon.owner?.email || "",
-              profileImage: salon.owner?.profileImage || "",
-            },
-          },
-          user: {
-            userId: uid,
-            fullName: user.profile.fullName,
-            phoneNumber: user.profile.phoneNumber,
-            profileImage: user.profile.profileImage || "",
-          },
-          services: selectedServices.map((s) => ({
-            serviceId: s.id,
-            name: s.name,
-            categoryId: s.categoryId,
-            providerId: s.providerId,
-            minutes: s.minutes,
-            price: s.price,
-          })),
-          schedule: {
-            startAt,
-            endAt,
-            durationMinutes: duration,
-          },
-          pricing: {
-            total: price,
-            currency: "EUR",
-          },
-          notes: notes || null,
-          review: null,
-          createdAt: new Date().toISOString(),
-        },
-      });
-
-      toast.success(autoAccept ? "Booking confirmed!" : "Booking submitted! Waiting for salon confirmation.");
+      await createBooking.mutateAsync({ bookingId, salonId: salon.uid, bookingData });
+      toast.success(t.booking.bookingConfirmed);
       clearBooking();
-      router.push("/bookings");
-    } catch (err) {
-      console.error("Booking failed:", err);
-      toast.error("Failed to create booking. Please try again.");
-    } finally {
-      setIsSubmitting(false);
+      router.push("/user/bookings");
+    } catch (err: unknown) {
+      toast.error(err instanceof Error ? err.message : "Booking failed");
     }
   };
 
+  // ── Confirmation Screen ──
+  if (showConfirmation) {
+    return (
+      <div className="min-h-screen bg-background">
+        <Header />
+        <main className="mx-auto max-w-md px-4 py-20 text-center">
+          <div className="mx-auto mb-6 h-20 w-20 rounded-full bg-emerald-50 flex items-center justify-center">
+            <CheckCircle2 className="h-10 w-10 text-emerald-500" />
+          </div>
+          <h1 className="text-2xl font-bold text-foreground mb-2">{t.booking.bookingConfirmed}</h1>
+          <p className="text-sm text-muted-foreground mb-1">
+            Your appointment at <strong>{salon.shopName}</strong>
+          </p>
+          <p className="text-sm text-muted-foreground mb-1">
+            with <strong>{selectedTeamMember?.name}</strong> has been
+            {salon.autoAcceptBooking === 1 ? " accepted" : " submitted"}.
+          </p>
+          <p className="text-sm font-medium text-foreground mt-4 mb-8">
+            {selectedDate && new Date(selectedDate).toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" })}
+            {" · "}{selectedTime}
+          </p>
+          <div className="flex gap-3 justify-center">
+            <Button variant="outline" onClick={() => { clearBooking(); router.push("/"); }} className="rounded-xl h-10 px-6">
+              {t.booking.goHome}
+            </Button>
+            <Button onClick={() => { clearBooking(); router.push("/bookings"); }} className="bg-[#C9AA8B] hover:bg-[#B8956F] text-white rounded-xl h-10 px-6">
+              {t.booking.viewBookings}
+            </Button>
+          </div>
+        </main>
+        <Footer />
+      </div>
+    );
+  }
+
+  const calDays = generateCalendarDays(calYear, calMonth);
+  const monthLabel = new Date(calYear, calMonth).toLocaleString("default", { month: "long", year: "numeric" });
+  const stepIndex = ["team_member", "date_time", "summary"].indexOf(step);
+
   return (
-    <>
+    <div className="min-h-screen bg-background">
       <Header />
+      <main className="w-full px-4 sm:px-6 lg:px-10 py-6 pb-16">
 
-      <div className="min-h-screen bg-[#FAF8F5] px-3 py-6 sm:px-4 sm:py-8">
-        <style>{`
-        @keyframes slideDown {
-          from { opacity: 0; transform: translateY(-8px); }
-          to   { opacity: 1; transform: translateY(0); }
-        }
-        .slide-in { animation: slideDown 0.25s ease forwards; }
-      `}</style>
+        {/* ── Step Progress ── */}
+        <div className="flex items-center gap-1 mb-6 text-xs">
+          {(["team_member", "date_time", "summary"] as BookingStep[]).map((s, i) => {
+            const labels = [t.booking.specialist, t.booking.selectDate, t.common.confirm];
+            const isActive = s === step;
+            const isPast = stepIndex > i;
+            return (
+              <div key={s} className="flex items-center gap-1">
+                {i > 0 && <span className="text-border mx-1">/</span>}
+                <button
+                  onClick={() => { if (i < stepIndex) setStep(s); }}
+                  className={`font-medium transition-colors ${isActive
+                    ? "text-[#C9AA8B]"
+                    : isPast
+                      ? "text-foreground hover:text-[#C9AA8B] cursor-pointer"
+                      : "text-muted-foreground/50 cursor-default"
+                    }`}
+                >
+                  {isPast && <Check className="inline h-3 w-3 mr-0.5" />}
+                  {labels[i]}
+                </button>
+              </div>
+            );
+          })}
+          <div className="ml-auto text-right text-xs text-muted-foreground hidden sm:block">
+            <span className="font-medium text-foreground">{salon.shopName}</span>
+            {" · "}{selectedServices.length} {t.booking.services.toLowerCase()} · {t.common.currency}{totalPrice()}
+          </div>
+        </div>
 
-        <div className="mx-auto max-w-6xl grid grid-cols-1 lg:grid-cols-[1fr_300px] gap-4 lg:gap-6 items-start">
+        <div className="h-px bg-border/40 mb-6" />
 
-          {/* ── LEFT: Calendar + time slots ── */}
+        {/* ═══ STEP 1: Team Member ═══ */}
+        {step === "team_member" && (
           <div>
-            <div className="border border-[#EDE7DF] bg-white overflow-hidden">
+            <h2 className="text-lg font-bold text-foreground mb-1">{t.booking.selectSpecialist}</h2>
+            <p className="text-sm text-muted-foreground mb-5">
+              {t.booking.chooseWhoHandles}
+            </p>
 
-              {/* Month header */}
-              <div className="bg-[#C9AA8B] flex items-center justify-between px-4 sm:px-6 py-3">
-                <button
-                  onClick={prevMonth}
-                  className="text-white/80 hover:text-white transition-colors text-lg px-2 leading-none bg-transparent border-none cursor-pointer"
-                >
-                  ←
-                </button>
-                <span className="text-white font-semibold text-[11px] sm:text-sm tracking-widest">
-                  {formatMonthYear(year, month)}
-                </span>
-                <button
-                  onClick={nextMonth}
-                  className="text-white/80 hover:text-white transition-colors text-lg px-2 leading-none bg-transparent border-none cursor-pointer"
-                >
-                  →
-                </button>
+            {membersLoading ? (
+              <div className="flex justify-center py-16">
+                <Loader2 className="h-6 w-6 animate-spin text-[#C9AA8B]" />
               </div>
-
-              {/* Day-of-week headers */}
-              <div className="grid grid-cols-7 border-b border-[#EDE7DF]">
-                {DAY_HEADERS.map((d) => (
-                  <div
-                    key={d}
-                    className="text-center py-2 text-[9px] sm:text-[11px] font-semibold tracking-wider text-[#AAAAAA] border-r border-[#EDE7DF] last:border-r-0"
-                  >
-                    {d}
-                  </div>
-                ))}
+            ) : eligibleMembers.length === 0 ? (
+              <div className="py-16 text-center">
+                <AlertCircle className="h-8 w-8 text-muted-foreground/30 mx-auto mb-3" />
+                <p className="text-sm text-foreground font-medium">{t.booking.noSpecialists}</p>
+                <p className="text-xs text-muted-foreground mt-1">{t.booking.noSpecialistsDesc}</p>
+                <Button variant="outline" size="sm" className="mt-4 rounded-lg" onClick={() => router.back()}>
+                  {t.common.cancel}
+                </Button>
               </div>
-
-              {/* Day grid */}
-              <div className="grid grid-cols-7">
-                {days.map((day, i) => {
-                  const isLastCol = i % 7 === 6;
-                  const cellBorder = `border-b border-[#EDE7DF]${!isLastCol ? " border-r" : ""}`;
-
-                  if (!day) {
-                    return (
-                      <div key={i} className={`h-10 sm:h-12 md:h-15 ${cellBorder}`} />
-                    );
-                  }
-
-                  const past = isPast(day);
-                  const sel = selectedDay === day;
-                  const tod = isToday(day);
-
+            ) : (
+              <div className="space-y-2">
+                {eligibleMembers.map((member) => {
+                  const isSelected = selectedTeamMember?.id === member.id;
                   return (
-                    <div key={i} className={cellBorder}>
-                      <button
-                        disabled={past}
-                        onClick={() => handleDaySelect(day)}
-                        className={[
-                          "w-full h-10 sm:h-12 md:h-15 flex items-start justify-start px-1.5 sm:px-2.5 pt-1.5 sm:pt-2 text-xs sm:text-sm transition-colors",
-                          past
-                            ? "text-[#CCCCCC] cursor-not-allowed"
-                            : sel
-                              ? "bg-[#E8C4B0] text-white font-semibold"
-                              : tod
-                                ? "text-[#C9AA8B] font-bold hover:bg-[#F5EDE6]"
-                                : "text-[#555555] hover:bg-[#F5EDE6]",
-                        ].join(" ")}
-                      >
-                        {day}
-                      </button>
-                    </div>
+                    <button
+                      key={member.id}
+                      onClick={() => setTeamMember(member)}
+                      className={`w-full flex items-center gap-4 p-4 rounded-xl border transition-colors text-left ${isSelected
+                        ? "border-[#C9AA8B] bg-[#C9AA8B]/5"
+                        : "border-border/40 hover:border-[#C9AA8B]/40 bg-white"
+                        }`}
+                    >
+                      <div className={`h-12 w-12 rounded-full flex items-center justify-center overflow-hidden flex-shrink-0 bg-gradient-to-br from-[#E8D5C0] to-[#F5EDE6] ${isSelected ? "ring-2 ring-[#C9AA8B] ring-offset-1" : ""
+                        }`}>
+                        {member.image ? (
+                          <Image src={member.image} alt={member.name} width={48} height={48} className="object-cover rounded-full" />
+                        ) : (
+                          <span className="text-lg font-bold text-[#B8956F]">{member.name.charAt(0)}</span>
+                        )}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-semibold text-foreground">{member.name}</p>
+                        <p className="text-xs text-muted-foreground">{member.role}</p>
+                      </div>
+                      <div className={`h-5 w-5 rounded-full border-2 flex items-center justify-center flex-shrink-0 transition-colors ${isSelected ? "border-[#C9AA8B] bg-[#C9AA8B]" : "border-border"
+                        }`}>
+                        {isSelected && <Check className="h-3 w-3 text-white" />}
+                      </div>
+                    </button>
                   );
                 })}
               </div>
+            )}
+
+            <div className="flex justify-end mt-6">
+              <Button
+                disabled={!selectedTeamMember}
+                onClick={() => setStep("date_time")}
+                className="bg-[#C9AA8B] hover:bg-[#B8956F] text-white rounded-xl px-6 h-10"
+              >
+                {t.common.confirm}
+                <ChevronRight className="h-4 w-4 ml-1" />
+              </Button>
             </div>
+          </div>
+        )}
 
-            {/* Time slots panel — revealed on date select */}
-            {selectedDay && (
-              <div className="slide-in border-x-2 border-b-2 border-[#E8C4B0] bg-white">
+        {/* ═══ STEP 2: Date & Time ═══ */}
+        {step === "date_time" && (
+          <div>
+            <h2 className="text-lg font-bold text-foreground mb-1">{t.booking.selectDate}</h2>
+            <p className="text-sm text-muted-foreground mb-5">
+              {selectedTeamMember?.name}
+              <button onClick={() => setStep("team_member")} className="ml-2 text-[#C9AA8B] hover:underline text-xs font-medium">
+                {t.booking.change}
+              </button>
+            </p>
 
-                {/* Panel heading */}
-                <div className="px-4 sm:px-5 py-3 sm:py-4 border-b border-[#F0EBE4] flex items-center justify-between">
-                  <p className="text-[10px] sm:text-xs font-semibold tracking-widest text-[#999999] uppercase m-0">
-                    {t.booking.selectTime} — {selectedLabel}
-                  </p>
-                  {loadingSlots && <Loader2 className="h-3.5 w-3.5 animate-spin text-[#C9AA8B]" />}
+            <div className="grid md:grid-cols-2 gap-6">
+              {/* Calendar */}
+              <div className="bg-white rounded-xl border border-border/40 p-5">
+                <div className="flex items-center justify-between mb-4">
+                  <button
+                    onClick={() => {
+                      if (calMonth === 0) { setCalMonth(11); setCalYear(calYear - 1); }
+                      else setCalMonth(calMonth - 1);
+                    }}
+                    className="h-7 w-7 rounded-lg flex items-center justify-center hover:bg-muted transition-colors"
+                  >
+                    <ChevronLeft className="h-4 w-4" />
+                  </button>
+                  <span className="text-sm font-bold text-foreground">{monthLabel}</span>
+                  <button
+                    onClick={() => {
+                      if (calMonth === 11) { setCalMonth(0); setCalYear(calYear + 1); }
+                      else setCalMonth(calMonth + 1);
+                    }}
+                    className="h-7 w-7 rounded-lg flex items-center justify-center hover:bg-muted transition-colors"
+                  >
+                    <ChevronRight className="h-4 w-4" />
+                  </button>
                 </div>
 
-                {/* Time buttons */}
-                <div className="p-3 sm:p-5 grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-1.5 sm:gap-2">
-                  {TIME_SLOTS.map((slot) => {
-                    const isTodaySelected = selectedDay !== null && isToday(selectedDay);
-                    const slotHour = parseInt(slot.split(":")[0]);
-                    const now = new Date();
-                    const isPastSlot = isTodaySelected && slotHour <= now.getHours();
-                    const isBooked = bookedSlots.includes(slot);
+                <div className="grid grid-cols-7 gap-0.5 mb-1">
+                  {["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"].map((d) => (
+                    <div key={d} className="text-center text-[10px] font-semibold text-muted-foreground/50 py-1">{d}</div>
+                  ))}
+                </div>
+
+                <div className="grid grid-cols-7 gap-0.5">
+                  {calDays.map((day, i) => {
+                    if (day === null) return <div key={`e${i}`} />;
+                    const dateObj = new Date(calYear, calMonth, day);
+                    const isPastDay = dateObj < new Date(today.getFullYear(), today.getMonth(), today.getDate());
+                    const isoStr = dateObj.toISOString();
+                    const isChosen = selectedDate === isoStr;
+                    const isToday = dateObj.toDateString() === today.toDateString();
+
+                    const dayKey = getWeekdayKey(dateObj);
+                    const salonRanges = weeklySchedule?.schedule[dayKey];
+                    const memberRanges = selectedTeamMember?.schedule[dayKey];
+                    const isClosed =
+                      !salonRanges || salonRanges.length === 0 || salonRanges[0]?.start === "closed" ||
+                      !memberRanges || memberRanges.length === 0 || memberRanges[0]?.start === "closed";
+                    const isDisabled = isPastDay || isClosed;
 
                     return (
                       <button
-                        key={slot}
-                        disabled={isPastSlot}
-                        onClick={() => {
-                          if (isBooked) {
-                            setNotifyPopup(slot);
-                          } else {
-                            handleTimeSelect(slot);
-                          }
-                        }}
-                        className={[
-                          "py-2.5 sm:py-3 text-xs sm:text-sm font-medium text-center border transition-all relative",
-                          isPastSlot
-                            ? "bg-[#F5F5F5] border-[#EDE7DF] text-[#CCCCCC] cursor-not-allowed line-through"
-                            : isBooked
-                              ? "bg-red-50 border-red-200 text-red-400 cursor-pointer"
-                              : localTime === slot
-                                ? "bg-[#E8C4B0] border-[#E8C4B0] text-white font-semibold"
-                                : "bg-white border-[#EDE7DF] text-[#444444] hover:bg-[#F5EDE6] hover:border-[#C9AA8B]",
-                        ].join(" ")}
+                        key={day}
+                        disabled={isDisabled}
+                        onClick={() => setDate(isoStr)}
+                        className={`h-9 rounded-lg text-sm font-medium transition-colors ${isChosen
+                          ? "bg-[#C9AA8B] text-white"
+                          : isDisabled
+                            ? "text-muted-foreground/20 cursor-not-allowed"
+                            : isToday
+                              ? "text-[#C9AA8B] font-bold hover:bg-[#C9AA8B]/10"
+                              : "text-foreground hover:bg-muted/60"
+                          }`}
                       >
-                        {isBooked ? `🔒 ${slot}` : slot}
+                        {day}
                       </button>
                     );
                   })}
                 </div>
               </div>
-            )}
+
+              {/* Time Slots */}
+              <div className="bg-white rounded-xl border border-border/40 p-5">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-sm font-bold text-foreground flex items-center gap-1.5">
+                    <Clock className="h-3.5 w-3.5 text-[#C9AA8B]" />
+                    {t.booking.availableTimes}
+                  </h3>
+                  {selectedDate && (
+                    <span className="text-xs text-muted-foreground">
+                      {new Date(selectedDate).toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" })}
+                    </span>
+                  )}
+                </div>
+
+                {!selectedDate ? (
+                  <div className="flex flex-col items-center py-10 text-center">
+                    <CalendarIcon className="h-8 w-8 text-muted-foreground/15 mb-2" />
+                    <p className="text-xs text-muted-foreground">{t.booking.selectDateFirst}</p>
+                  </div>
+                ) : availableSlots.length === 0 ? (
+                  <div className="flex flex-col items-center py-10 text-center">
+                    <AlertCircle className="h-8 w-8 text-muted-foreground/15 mb-2" />
+                    <p className="text-xs text-muted-foreground">{t.booking.noSlots}</p>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-3 sm:grid-cols-4 gap-2 max-h-[300px] overflow-y-auto">
+                    {availableSlots.map((slot) => {
+                      const dateObj = new Date(selectedDate);
+                      const past = isSlotPast(dateObj, slot);
+                      const disabled = past || isSlotDisabled(slot, totalMinutes(), disabledSlots || {});
+                      const isChosen = selectedTime === slot;
+
+                      return (
+                        <button
+                          key={slot}
+                          disabled={disabled}
+                          onClick={() => setTime(slot)}
+                          className={`py-2 rounded-lg text-sm font-medium transition-colors ${isChosen
+                            ? "bg-[#C9AA8B] text-white"
+                            : disabled
+                              ? "bg-muted/20 text-muted-foreground/25 cursor-not-allowed line-through"
+                              : "bg-muted/30 text-foreground hover:bg-[#C9AA8B]/10 hover:text-[#B8956F]"
+                            }`}
+                        >
+                          {slot}
+                        </button>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+            </div>
+
+            <div className="flex justify-between mt-6">
+              <Button variant="outline" onClick={() => setStep("team_member")} className="rounded-xl h-10">
+                <ChevronLeft className="h-4 w-4 mr-1" /> {t.common.cancel}
+              </Button>
+              <Button
+                disabled={!selectedDate || !selectedTime}
+                onClick={() => setStep("summary")}
+                className="bg-[#C9AA8B] hover:bg-[#B8956F] text-white rounded-xl px-6 h-10"
+              >
+                {t.common.confirm} <ChevronRight className="h-4 w-4 ml-1" />
+              </Button>
+            </div>
           </div>
+        )}
 
-          {/* ── RIGHT: Summary ── */}
-          <div className="lg:sticky lg:top-6">
-            <div className="bg-white border border-[#EDE7DF] p-5 sm:p-6 shadow-sm">
+        {/* ═══ STEP 3: Summary ═══ */}
+        {step === "summary" && (
+          <div className="max-w-lg mx-auto">
+            <h2 className="text-lg font-bold text-foreground text-center mb-1">{t.booking.summary}</h2>
+            <p className="text-sm text-muted-foreground text-center mb-5">{t.booking.summaryDesc}</p>
 
-              <p className="text-sm font-semibold text-[#999] uppercase tracking-wider mb-1">{salon.shopName}</p>
-              <p className="text-base font-bold text-[#222222] mb-4">{t.booking.summary}</p>
+            <div className="bg-white rounded-xl border border-border/40 divide-y divide-border/30">
+              {/* Salon */}
+              <div className="px-5 py-4 flex items-center gap-3">
+                <div className="h-10 w-10 rounded-lg bg-gradient-to-br from-[#E8D5C0] to-[#F5EDE6] flex items-center justify-center flex-shrink-0">
+                  <span className="text-sm font-bold text-[#B8956F]">{salon.shopName.charAt(0)}</span>
+                </div>
+                <div className="min-w-0">
+                  <p className="text-sm font-semibold text-foreground truncate">{salon.shopName}</p>
+                  <p className="text-xs text-muted-foreground truncate">{salon.address || salon.city}</p>
+                </div>
+              </div>
+
+              {/* Specialist */}
+              <div className="px-5 py-4 flex items-center gap-3">
+                <div className="h-10 w-10 rounded-full bg-gradient-to-br from-[#E8D5C0] to-[#F5EDE6] flex items-center justify-center overflow-hidden flex-shrink-0">
+                  {selectedTeamMember?.image ? (
+                    <Image src={selectedTeamMember.image} alt={selectedTeamMember.name} width={40} height={40} className="object-cover rounded-full" />
+                  ) : (
+                    <span className="text-sm font-bold text-[#B8956F]">{selectedTeamMember?.name.charAt(0)}</span>
+                  )}
+                </div>
+                <div>
+                  <p className="text-xs text-muted-foreground">{t.booking.specialist}</p>
+                  <p className="text-sm font-semibold text-foreground">{selectedTeamMember?.name}</p>
+                </div>
+              </div>
+
+              {/* Date & Time */}
+              <div className="px-5 py-4 grid grid-cols-3 gap-4">
+                <div>
+                  <p className="text-xs text-muted-foreground mb-0.5">{t.booking.date}</p>
+                  <p className="text-sm font-semibold text-foreground">
+                    {selectedDate && new Date(selectedDate).toLocaleDateString("en-US", { month: "short", day: "numeric" })}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-xs text-muted-foreground mb-0.5">{t.booking.time}</p>
+                  <p className="text-sm font-semibold text-foreground">{selectedTime}</p>
+                </div>
+                <div>
+                  <p className="text-xs text-muted-foreground mb-0.5">{t.booking.duration}</p>
+                  <p className="text-sm font-semibold text-foreground">{totalMinutes()} min</p>
+                </div>
+              </div>
 
               {/* Services */}
-              {selectedServices.map((s) => (
-                <div key={s.id} className="flex justify-between items-start mb-3">
-                  <div>
-                    <p className="text-sm font-medium text-[#333333] m-0">{s.name}</p>
-                    <p className="text-xs text-[#AAAAAA] mt-0.5 m-0">{s.minutes} min</p>
-                  </div>
-                  <span className="text-sm font-semibold text-[#333333]">€{s.price}</span>
+              <div className="px-5 py-4">
+                <p className="text-xs text-muted-foreground mb-2">{t.booking.services}</p>
+                <div className="space-y-1.5">
+                  {selectedServices.map((s) => (
+                    <div key={s.id} className="flex items-center justify-between text-sm">
+                      <span className="text-foreground">{s.name}</span>
+                      <span className="font-medium text-foreground">{t.common.currency}{s.price}</span>
+                    </div>
+                  ))}
                 </div>
-              ))}
-
-              <div className="border-t border-[#EDE7DF] my-4" />
-
-              {/* Date / Time / Duration */}
-              {[
-                { icon: "📅", label: t.booking.date, value: selectedDay ? `${selectedDay} ${monthName}` : "—" },
-                { icon: "🕐", label: t.booking.time, value: localTime || "—" },
-                { icon: "⏱", label: t.booking.duration, value: `${duration} min` },
-              ].map(({ icon, label, value }) => (
-                <div key={label} className="flex justify-between items-center mb-2.5">
-                  <span className="text-xs text-[#999999] flex items-center gap-1">
-                    {icon} {label}
-                  </span>
-                  <span className="text-xs font-medium text-[#333333]">{value}</span>
-                </div>
-              ))}
+              </div>
 
               {/* Notes */}
-              <div className="mt-3">
+              <div className="px-5 py-4">
+                <p className="text-xs text-muted-foreground mb-1.5">{t.booking.notes}</p>
                 <textarea
-                  placeholder="Add notes for the salon (optional)"
-                  className="w-full border border-[#EDE7DF] rounded-lg p-3 text-sm resize-none h-20 focus:outline-none focus:border-[#C9AA8B]"
                   value={notes}
                   onChange={(e) => setNotes(e.target.value)}
+                  placeholder={t.booking.notesPlaceholder}
+                  className="w-full rounded-lg border border-border/40 bg-[#FDFBF9] p-3 text-sm text-foreground placeholder:text-muted-foreground/40 resize-none h-16 focus:outline-none focus:ring-1 focus:ring-[#C9AA8B] transition-colors"
                 />
               </div>
 
-              <div className="border-t border-[#EDE7DF] my-4" />
-
               {/* Total */}
-              <div className="flex justify-between items-center mb-5">
-                <span className="text-sm font-bold text-[#222222]">{t.booking.total}</span>
-                <span className="text-2xl font-bold text-[#222222]">€{price}</span>
+              <div className="px-5 py-4 flex items-center justify-between bg-[#FDFBF9]">
+                <span className="text-sm font-bold text-foreground">{t.booking.total}</span>
+                <span className="text-lg font-bold text-foreground">{t.common.currency}{totalPrice()}</span>
               </div>
+            </div>
 
-              {/* Confirm button */}
-              <button
-                disabled={!selectedDay || !localTime || isSubmitting}
-                onClick={handleConfirm}
-                className="w-full py-3.5 text-sm font-bold tracking-wide bg-[#333333] text-white transition-colors hover:bg-[#111111] disabled:bg-[#CCCCCC] disabled:cursor-not-allowed flex items-center justify-center gap-2"
+            <div className="flex justify-between mt-6">
+              <Button variant="outline" onClick={() => setStep("date_time")} className="rounded-xl h-10">
+                <ChevronLeft className="h-4 w-4 mr-1" /> {t.common.cancel}
+              </Button>
+              <Button
+                onClick={handleConfirmBooking}
+                disabled={createBooking.isPending}
+                className="bg-[#C9AA8B] hover:bg-[#B8956F] text-white rounded-xl px-6 h-10 font-semibold"
               >
-                {isSubmitting ? (
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                ) : (
-                  <>✓ {t.booking.confirm}</>
-                )}
-              </button>
-
-              <p className="text-[10px] text-[#BBBBBB] text-center mt-2.5">
-                {t.booking.freeCancellation}
-              </p>
+                {createBooking.isPending && <Loader2 className="h-4 w-4 mr-1.5 animate-spin" />}
+                {t.booking.confirm}
+              </Button>
             </div>
           </div>
+        )}
 
-        </div>
-      </div>
-
-      {/* Notify Me Popup for booked slots */}
-      <Dialog open={!!notifyPopup} onOpenChange={() => setNotifyPopup(null)}>
-        <DialogContent className="sm:max-w-sm w-[90vw] rounded-xl">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <span className="text-red-500">🔒</span> Slot Unavailable
-            </DialogTitle>
-          </DialogHeader>
-          <div className="py-3">
-            <p className="text-sm text-muted-foreground mb-1">
-              The <span className="font-semibold text-foreground">{notifyPopup}</span> slot on{" "}
-              <span className="font-semibold text-foreground">{selectedLabel}</span> is already booked.
-            </p>
-            <p className="text-xs text-muted-foreground mt-2">
-              Would you like to be notified if this slot becomes available?
-            </p>
-          </div>
-          <div className="flex gap-3">
-            <Button
-              variant="outline"
-              onClick={() => setNotifyPopup(null)}
-              className="flex-1 rounded-lg h-10"
-            >
-              Cancel
-            </Button>
-            <Button
-              onClick={() => {
-                toast.success(`We'll notify you if ${notifyPopup} becomes available!`);
-                setNotifyPopup(null);
-              }}
-              className="flex-1 bg-[#C9AA8B] hover:bg-[#B8956F] text-white rounded-lg h-10 gap-1.5"
-            >
-              <BellRing className="h-3.5 w-3.5" />
-              Notify Me
-            </Button>
-          </div>
-        </DialogContent>
-      </Dialog>
-
+      </main>
       <Footer />
-    </>
+    </div>
   );
 }

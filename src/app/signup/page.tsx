@@ -650,7 +650,17 @@ export default function SignupPage() {
                       ))}
                     </div>
                   </div>
-                  <Field label="SIRET Number"><AppInput placeholder="123 456 789 00012" value={siretNumber} onChange={setSiretNumber} disabled={loading} /></Field>
+                  <div>
+                    <Field label="Company Registration Number"><AppInput placeholder="123 456 789" value={siretNumber} onChange={setSiretNumber} disabled={loading} /></Field>
+                    <div style={{ marginTop: 8, padding: "10px 12px", background: "#F5F5F4", border: "1px solid #E5E7EB", borderRadius: 8, fontSize: 11.5, color: "#57534E", lineHeight: 1.5 }}>
+                      <div style={{ display: "grid", gridTemplateColumns: "1fr", gap: 3 }}>
+                        <span>🇫🇷 <strong>France</strong> &rarr; SIRET number</span>
+                        <span>🇧🇪 <strong>Belgium</strong> &rarr; Company registration number</span>
+                        <span>🇬🇧 <strong>UK</strong> &rarr; Company registration number</span>
+                        <span>🇺🇸 <strong>USA</strong> &rarr; Taxpayer Identification Number (EIN)</span>
+                      </div>
+                    </div>
+                  </div>
                   <Field label="Legal Status"><AppSelect options={["SAS", "SARL", "EURL", "Auto-entrepreneur", "SA"]} placeholder="Select status..." value={legalStatus} onChange={setLegalStatus} disabled={loading} /></Field>
                   <div>
                     <FieldLabel>Description</FieldLabel>

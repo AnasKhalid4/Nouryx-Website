@@ -17,11 +17,13 @@ import {
     DocumentSnapshot,
     Timestamp,
     deleteField,
+    runTransaction,
 } from "firebase/firestore";
 import { db } from "./config";
 import type { AuthUser, SalonService } from "@/types/user";
 import type { SalonModel, SalonFetchResult } from "@/types/salon";
 import type { CategoryModel } from "@/types/category";
+import type { TeamMemberModel, WeeklyScheduleModel, TimeRange } from "@/types/team-member";
 
 // --------------------------------------------------
 // COLLECTION REFERENCES
@@ -285,48 +287,94 @@ export async function createBooking(
     salonId: string,
     bookingData: Record<string, unknown>
 ): Promise<void> {
-    // 1. Write main booking doc
-    await setDoc(doc(db, "bookings", bookingId), {
-        ...bookingData,
-        createdAt: serverTimestamp(),
-    });
+    const schedule = bookingData.schedule as Record<string, unknown> | undefined;
+    const startAt = schedule?.startAt as string | undefined;
+    const durationMinutes = Number(schedule?.durationMinutes ?? 0);
+    const teamMember = bookingData.team_member as Record<string, unknown> | undefined;
+    const memberId = teamMember?.memberId as string | undefined;
 
-    // 2. Add booking ref to user's own subcollection
-    try {
-        await setDoc(doc(db, "users", userId, "bookings", bookingId), {
-            bookingId,
-            salonId,
-            status: bookingData.status,
+    // If we have member + schedule info, use transactional per-member slot blocking
+    if (startAt && memberId && durationMinutes > 0) {
+        const startDate = new Date(startAt);
+        const yyyy = startDate.getFullYear().toString().padStart(4, "0");
+        const mm = (startDate.getMonth() + 1).toString().padStart(2, "0");
+        const dd = startDate.getDate().toString().padStart(2, "0");
+        const dayKey = `${yyyy}-${mm}-${dd}`;
+
+        const slotRef = doc(db, "salons", salonId, "members", memberId, "slots", dayKey);
+        const bookingRef = doc(db, "bookings", bookingId);
+
+        await runTransaction(db, async (tx) => {
+            const slotDoc = await tx.get(slotRef);
+            const slotData = slotDoc.data() ?? {};
+
+            const SLOT_INTERVAL = 15;
+            const startMinutes =
+                startDate.getHours() * 60 + startDate.getMinutes();
+            const endMinutes = startMinutes + durationMinutes;
+
+            const slotsToBlock: Record<string, boolean> = {};
+            let cursor = startMinutes;
+
+            // Check for overlapping booked slots
+            while (cursor < endMinutes) {
+                const h = Math.floor(cursor / 60).toString().padStart(2, "0");
+                const m = (cursor % 60).toString().padStart(2, "0");
+                const key = `${h}:${m}`;
+
+                if (slotData[key] === true) {
+                    throw new Error(`Slot ${key} is already booked`);
+                }
+
+                slotsToBlock[key] = true;
+                cursor += SLOT_INTERVAL;
+            }
+
+            // Block all slots
+            tx.set(slotRef, slotsToBlock, { merge: true });
+
+            // Create booking
+            tx.set(bookingRef, {
+                ...bookingData,
+                createdAt: serverTimestamp(),
+            });
+        });
+
+        // Write user + provider booking indexes (outside transaction)
+        try {
+            await setDoc(doc(db, "users", userId, "bookings", bookingId), {
+                bookingId,
+                createdAt: serverTimestamp(),
+            });
+        } catch (e) {
+            console.warn("Could not write user booking index:", e);
+        }
+
+        try {
+            await setDoc(doc(db, "users", salonId, "bookings", bookingId), {
+                bookingId,
+                createdAt: serverTimestamp(),
+            });
+        } catch (e) {
+            console.warn("Could not write provider booking index:", e);
+        }
+    } else {
+        // Fallback: simple write without slot blocking (for backward compat)
+        await setDoc(doc(db, "bookings", bookingId), {
+            ...bookingData,
             createdAt: serverTimestamp(),
         });
-    } catch (e) {
-        console.warn("Could not write user booking index:", e);
-    }
 
-    // 3. Mark the time slot as disabled in salons/{salonId}/slots/{YYYY-MM-DD}
-    try {
-        const schedule = bookingData.schedule as Record<string, unknown> | undefined;
-        const startAt = schedule?.startAt as string | undefined; // "2026-03-02T09:00:00.000Z"
-        if (startAt) {
-            const dateObj = new Date(startAt);
-            const yyyy = dateObj.getFullYear().toString().padStart(4, "0");
-            const mm = (dateObj.getMonth() + 1).toString().padStart(2, "0");
-            const dd = dateObj.getDate().toString().padStart(2, "0");
-            const dateKey = `${yyyy}-${mm}-${dd}`;
-
-            // Extract "HH:mm" local time
-            const hour = dateObj.getHours().toString().padStart(2, "0");
-            const minute = dateObj.getMinutes().toString().padStart(2, "0");
-            const timeKey = `${hour}:${minute}`;
-
-            await setDoc(
-                doc(db, "salons", salonId, "slots", dateKey),
-                { [timeKey]: true },
-                { merge: true }
-            );
+        try {
+            await setDoc(doc(db, "users", userId, "bookings", bookingId), {
+                bookingId,
+                salonId,
+                status: bookingData.status,
+                createdAt: serverTimestamp(),
+            });
+        } catch (e) {
+            console.warn("Could not write user booking index:", e);
         }
-    } catch (e) {
-        console.warn("Could not write salon disabled slot:", e);
     }
 }
 
@@ -337,7 +385,7 @@ export async function updateBookingStatus(
 ): Promise<void> {
     const ref = doc(db, "bookings", bookingId);
 
-    // If cancelling, we need to unlock the time slot
+    // If cancelling, we need to unlock the time slots
     if (status === "cancelled") {
         try {
             const snap = await getDoc(ref);
@@ -346,6 +394,9 @@ export async function updateBookingStatus(
                 const salonId = data.salon?.salonId as string | undefined;
                 const schedule = data.schedule as Record<string, unknown> | undefined;
                 const startAt = schedule?.startAt as string | undefined;
+                const durationMinutes = Number(schedule?.durationMinutes ?? 0);
+                const teamMember = data.team_member as Record<string, unknown> | undefined;
+                const memberId = teamMember?.memberId as string | undefined;
 
                 if (salonId && startAt) {
                     const dateObj = new Date(startAt);
@@ -354,15 +405,38 @@ export async function updateBookingStatus(
                     const dd = dateObj.getDate().toString().padStart(2, "0");
                     const dateKey = `${yyyy}-${mm}-${dd}`;
 
-                    const hour = dateObj.getHours().toString().padStart(2, "0");
-                    const minute = dateObj.getMinutes().toString().padStart(2, "0");
-                    const timeKey = `${hour}:${minute}`;
+                    if (memberId && durationMinutes > 0) {
+                        // Per-member slot unblocking (new format)
+                        const SLOT_INTERVAL = 15;
+                        const startMinutes =
+                            dateObj.getHours() * 60 + dateObj.getMinutes();
+                        const endMinutes = startMinutes + durationMinutes;
 
-                    // Remove the timeKey from the disabled slots document
-                    await updateDoc(
-                        doc(db, "salons", salonId, "slots", dateKey),
-                        { [timeKey]: deleteField() }
-                    );
+                        const slotsToUnblock: Record<string, unknown> = {};
+                        let cursor = startMinutes;
+
+                        while (cursor < endMinutes) {
+                            const h = Math.floor(cursor / 60).toString().padStart(2, "0");
+                            const m = (cursor % 60).toString().padStart(2, "0");
+                            slotsToUnblock[`${h}:${m}`] = deleteField();
+                            cursor += SLOT_INTERVAL;
+                        }
+
+                        await updateDoc(
+                            doc(db, "salons", salonId, "members", memberId, "slots", dateKey),
+                            slotsToUnblock
+                        );
+                    } else {
+                        // Legacy flat slot unblocking (old format)
+                        const hour = dateObj.getHours().toString().padStart(2, "0");
+                        const minute = dateObj.getMinutes().toString().padStart(2, "0");
+                        const timeKey = `${hour}:${minute}`;
+
+                        await updateDoc(
+                            doc(db, "salons", salonId, "slots", dateKey),
+                            { [timeKey]: deleteField() }
+                        );
+                    }
                 }
             }
         } catch (e) {
@@ -404,12 +478,41 @@ export async function fetchSalonBookings(
 }
 
 /**
- * Fetch already-booked time slots for a salon on a specific date.
- * Returns array of time strings like ["09:00", "14:00"]
+ * Fetch already-booked time slots for a team member on a specific date.
+ * Uses per-member path: salons/{salonId}/members/{memberId}/slots/{dateStr}
+ * Returns Record<string, boolean> matching mobile app format.
+ */
+export async function fetchMemberBookedSlots(
+    salonId: string,
+    memberId: string,
+    dateStr: string  // "YYYY-MM-DD"
+): Promise<Record<string, boolean>> {
+    try {
+        const docRef = doc(db, "salons", salonId, "members", memberId, "slots", dateStr);
+        const docSnap = await getDoc(docRef);
+
+        if (docSnap.exists()) {
+            const data = docSnap.data();
+            const result: Record<string, boolean> = {};
+            for (const key of Object.keys(data)) {
+                if (data[key] === true) result[key] = true;
+            }
+            return result;
+        }
+        return {};
+    } catch (error) {
+        console.error("Error fetching member booked slots:", error);
+        return {};
+    }
+}
+
+/**
+ * @deprecated Use fetchMemberBookedSlots instead for per-member slot tracking.
+ * Kept for backward compatibility with old flat slot structure.
  */
 export async function fetchBookedSlots(
     salonId: string,
-    dateStr: string  // ISO date e.g. "2026-03-02"
+    dateStr: string
 ): Promise<string[]> {
     try {
         const docRef = doc(db, "salons", salonId, "slots", dateStr);
@@ -417,7 +520,6 @@ export async function fetchBookedSlots(
 
         if (docSnap.exists()) {
             const data = docSnap.data();
-            // Return array of keys (times) where value is true
             return Object.keys(data).filter(time => data[time] === true);
         }
         return [];
@@ -874,5 +976,160 @@ function parseSalonService(
         price: Number(data.price ?? 0),
         createdAt: (data.createdAt as Timestamp)?.toDate() ?? undefined,
     };
+}
+
+// --------------------------------------------------
+// TEAM MEMBERS (subcollection under users/{salonId}/team_members)
+// --------------------------------------------------
+
+function parseTeamMember(
+    id: string,
+    data: Record<string, unknown>
+): TeamMemberModel {
+    const rawSchedule = data.schedule as Record<string, unknown> | undefined;
+    const schedule: Record<string, TimeRange[]> = {};
+
+    if (rawSchedule) {
+        for (const [day, ranges] of Object.entries(rawSchedule)) {
+            if (Array.isArray(ranges)) {
+                schedule[day] = ranges.map((r: unknown) => {
+                    if (typeof r === "object" && r !== null) {
+                        const rangeObj = r as Record<string, string>;
+                        return {
+                            start: rangeObj.start || "closed",
+                            end: rangeObj.end || "closed",
+                        };
+                    }
+                    // Legacy format: single string like "09:00-18:00"
+                    if (typeof r === "string" && r.includes("-")) {
+                        const [start, end] = r.split("-");
+                        return { start, end };
+                    }
+                    return { start: "closed", end: "closed" };
+                });
+            }
+        }
+    }
+
+    return {
+        id,
+        name: (data.name as string) || "",
+        role: (data.role as string) || "",
+        image: (data.image as string) || "",
+        enabled: data.enabled !== false, // default to true
+        schedule,
+        serviceIds: Array.isArray(data.serviceIds)
+            ? (data.serviceIds as string[])
+            : [],
+    };
+}
+
+export async function fetchSalonTeamMembers(
+    salonId: string
+): Promise<TeamMemberModel[]> {
+    const ref = collection(db, "users", salonId, "team_members");
+    const snap = await getDocs(ref);
+    return snap.docs
+        .map((d) => parseTeamMember(d.id, d.data()))
+        .filter((m) => m.enabled);
+}
+
+export async function fetchAllTeamMembers(
+    salonId: string
+): Promise<TeamMemberModel[]> {
+    const ref = collection(db, "users", salonId, "team_members");
+    const snap = await getDocs(ref);
+    return snap.docs.map((d) => parseTeamMember(d.id, d.data()));
+}
+
+export async function addTeamMember(
+    salonId: string,
+    data: Omit<TeamMemberModel, "id">
+): Promise<string> {
+    const ref = collection(db, "users", salonId, "team_members");
+    const docRef = await addDoc(ref, {
+        ...data,
+        createdAt: serverTimestamp(),
+    });
+    return docRef.id;
+}
+
+export async function updateTeamMember(
+    salonId: string,
+    memberId: string,
+    data: Partial<Omit<TeamMemberModel, "id">>
+): Promise<void> {
+    const ref = doc(db, "users", salonId, "team_members", memberId);
+    await updateDoc(ref, data as Record<string, unknown>);
+}
+
+export async function deleteTeamMember(
+    salonId: string,
+    memberId: string
+): Promise<void> {
+    await deleteDoc(doc(db, "users", salonId, "team_members", memberId));
+}
+
+// --------------------------------------------------
+// SALON WEEKLY SCHEDULE (doc under users/{salonId}/salon_schedule/weekly)
+// --------------------------------------------------
+
+function parseWeeklySchedule(
+    data: Record<string, unknown>
+): WeeklyScheduleModel {
+    const schedule: Record<string, TimeRange[]> = {};
+
+    for (const [day, ranges] of Object.entries(data)) {
+        if (day === "id" || day === "createdAt") continue; // Skip metadata fields
+        if (Array.isArray(ranges)) {
+            schedule[day] = ranges.map((r: unknown) => {
+                if (typeof r === "object" && r !== null) {
+                    const rangeObj = r as Record<string, string>;
+                    return {
+                        start: rangeObj.start || "closed",
+                        end: rangeObj.end || "closed",
+                    };
+                }
+                if (typeof r === "string" && r.includes("-")) {
+                    const [start, end] = r.split("-");
+                    return { start, end };
+                }
+                return { start: "closed", end: "closed" };
+            });
+        }
+    }
+
+    return { schedule };
+}
+
+export async function fetchSalonWeeklySchedule(
+    salonId: string
+): Promise<WeeklyScheduleModel | null> {
+    try {
+        const ref = doc(db, "users", salonId, "salon_schedule", "weekly");
+        const snap = await getDoc(ref);
+        if (!snap.exists()) return null;
+        return parseWeeklySchedule(snap.data());
+    } catch (error) {
+        console.error("Error fetching salon schedule:", error);
+        return null;
+    }
+}
+
+export async function saveDaySchedule(
+    salonId: string,
+    dayKey: string,
+    ranges: TimeRange[]
+): Promise<void> {
+    const ref = doc(db, "users", salonId, "salon_schedule", "weekly");
+    await setDoc(ref, { [dayKey]: ranges }, { merge: true });
+}
+
+export async function saveFullWeeklySchedule(
+    salonId: string,
+    schedule: Record<string, TimeRange[]>
+): Promise<void> {
+    const ref = doc(db, "users", salonId, "salon_schedule", "weekly");
+    await setDoc(ref, schedule);
 }
 

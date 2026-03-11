@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Header } from "@/components/layout/header";
-import { LayoutDashboard, CalendarDays, User, Scissors, Settings, CreditCard, MessageSquare, Bell } from "lucide-react";
+import { LayoutDashboard, CalendarDays, User, Scissors, Settings, CreditCard, MessageSquare, Bell, Users, Clock } from "lucide-react";
 import { useLocale } from "@/hooks/use-locale";
 import { useAuth } from "@/hooks/use-auth";
 
@@ -12,6 +12,8 @@ const sidebarItems = [
   { icon: CalendarDays, key: "bookings" as const, href: "/dashboard/bookings" },
   { icon: User, key: "profile" as const, href: "/dashboard/profile" },
   { icon: Scissors, key: "services" as const, href: "/dashboard/services" },
+  { icon: Users, key: "teamMembers" as const, href: "/dashboard/team-members" },
+  { icon: Clock, key: "schedule" as const, href: "/dashboard/schedule" },
   { icon: MessageSquare, key: "chat" as const, href: "/chat" },
   { icon: Bell, key: "notifications" as const, href: "/dashboard/notifications" },
   { icon: CreditCard, key: "subscription" as const, href: "/dashboard/subscription" },
@@ -32,6 +34,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     bookings: t.dashboard.bookings.title,
     profile: t.dashboard.profile.title,
     services: t.dashboard.services.title,
+    teamMembers: "Team Members",
+    schedule: "Schedule",
     chat: t.chat.title,
     notifications: t.notifications?.title || "Notifications",
     subscription: t.dashboard.subscription.title,

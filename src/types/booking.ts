@@ -1,4 +1,5 @@
 // TypeScript types mirroring booking_model.dart
+import type { BookingTeamMember } from "./team-member";
 
 export interface BookingService {
     serviceId: string;
@@ -65,6 +66,7 @@ export interface BookingModel {
     pricing: BookingPricing;
     notes: string | null;
     review: BookingReview | null;
+    team_member: BookingTeamMember;
     cancelReason?: string;
     cancelledBy?: string;
     cancelledAt?: Date;

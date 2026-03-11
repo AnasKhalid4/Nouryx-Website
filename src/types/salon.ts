@@ -1,5 +1,6 @@
 // TypeScript types mirroring salon_model.dart + salon_owner_data.dart
 import type { SalonService } from "./user";
+import type { TeamMemberModel, WeeklyScheduleModel } from "./team-member";
 
 export interface SalonOwnerData {
     fullName: string;
@@ -30,6 +31,8 @@ export interface SalonModel {
     distanceKm?: number;
     services?: SalonService[];
     fcmTokens: string[];
+    teamMembers?: TeamMemberModel[];
+    weeklySchedule?: WeeklyScheduleModel;
 }
 
 export interface SalonFetchResult {

@@ -44,4 +44,21 @@ export const queryKeys = {
         all: ["favorites"] as const,
         list: (uid: string) => [...queryKeys.favorites.all, uid] as const,
     },
+    teamMembers: {
+        all: ["teamMembers"] as const,
+        bySalon: (salonId: string) =>
+            [...queryKeys.teamMembers.all, salonId] as const,
+        allBySalon: (salonId: string) =>
+            [...queryKeys.teamMembers.all, salonId, "all"] as const,
+    },
+    schedule: {
+        all: ["schedule"] as const,
+        bySalon: (salonId: string) =>
+            [...queryKeys.schedule.all, salonId] as const,
+    },
+    memberSlots: {
+        all: ["memberSlots"] as const,
+        byMemberDate: (salonId: string, memberId: string, dateStr: string) =>
+            [...queryKeys.memberSlots.all, salonId, memberId, dateStr] as const,
+    },
 };
