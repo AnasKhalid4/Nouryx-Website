@@ -34,10 +34,12 @@ export function Footer() {
   const footerSections = [
     {
       title: t.footer.about.title,
-      links: t.footer.about.links.map((label, i) => ({
-        label,
-        href: ["/about", "#", "#", "#"][i],
-      })),
+      links: [
+        { label: "About", href: "/about" },
+        { label: "Pricing", href: "/pricing" },
+       
+        { label: "Help and Support", href: "https://admin.nouryx.com/#/support" },
+      ],
     },
     {
       title: t.footer.business.title,
@@ -58,7 +60,7 @@ export function Footer() {
   return (
     <footer className="bg-white border-t border-border">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-12 lg:py-16">
-        <div className="grid grid-cols-2 md:grid-cols-5 gap-8">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-8 max-w-6xl mx-auto">
           {/* Brand */}
           <div className="col-span-2 md:col-span-1">
 
@@ -97,25 +99,6 @@ export function Footer() {
             </div>
           ))}
 
-          {/* Social */}
-          <div>
-            <h3 className="text-sm font-semibold text-foreground mb-3">
-              {t.footer.social.title}
-            </h3>
-            <ul className="space-y-2.5">
-              {socialIcons.map((social) => (
-                <li key={social.name}>
-                  <a
-                    href={social.href}
-                    className="text-sm text-muted-foreground hover:text-foreground transition-colors inline-flex items-center gap-2"
-                  >
-                    <social.icon className="h-3.5 w-3.5" />
-                    {social.name}
-                  </a>
-                </li>
-              ))}
-            </ul>
-          </div>
         </div>
         <div className="text-center">
           <div className="relative w-32 h-16 sm:w-48 sm:h-24 md:w-64 md:h-32 lg:w-80 lg:h-40 xl:w-96 xl:h-48 mx-auto">
