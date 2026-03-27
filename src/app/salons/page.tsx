@@ -4,7 +4,6 @@ import { Suspense } from "react";
 import { Header } from "@/components/layout/header";
 import { Footer } from "@/components/layout/footer";
 import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
 import { Search, MapPin, Star, X, Loader2 } from "lucide-react";
 import { useLocale } from "@/hooks/use-locale";
 import { useAllSalons } from "@/hooks/use-salons";
@@ -32,6 +31,7 @@ function SalonsContent() {
   const filtered = useMemo(() => {
     if (!allSalons) return [];
     return allSalons.filter((s) => {
+      if (s.isFeatured) return false;
       const q = searchQuery.toLowerCase();
       const matchesSearch =
         !searchQuery ||
@@ -128,11 +128,6 @@ function SalonsContent() {
                         <div className="flex items-center justify-center h-full text-[#C9AA8B] text-3xl font-bold">
                           {salon.shopName.charAt(0)}
                         </div>
-                      )}
-                      {salon.isFeatured && (
-                        <Badge className="absolute top-3 left-3 bg-[#C9AA8B] text-white text-[10px] hover:bg-[#C9AA8B] z-10">
-                          {t.salonDetailExtra.featured}
-                        </Badge>
                       )}
                     </div>
                     <div className="p-4">

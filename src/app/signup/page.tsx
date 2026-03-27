@@ -12,6 +12,7 @@ import { uploadUserProfileImage, uploadSalonLogo, uploadSalonShopImages } from "
 import { getPlaceDetails, autocomplete } from "@/lib/google-places";
 import { useAuthStore } from "@/stores/auth-store";
 import { toast } from "sonner";
+import { useLocale } from "@/hooks/use-locale";
 
 // Normalize phone to E.164 format
 function normalizePhone(phone: string): string {
@@ -109,7 +110,7 @@ function UploadZone({ round = false, label, Icon = Upload, preview, onFileSelect
   );
 }
 
-function StepIndicator({ step }: { step: number }) {
+function StepIndicator({ step, stepOneLabel, stepTwoLabel }: { step: number; stepOneLabel: string; stepTwoLabel: string }) {
   return (
     <div style={{ display: "flex", alignItems: "center", marginBottom: 4, width: "80%" }}>
       {[1, 2].map((s, i) => (
@@ -119,23 +120,13 @@ function StepIndicator({ step }: { step: number }) {
               {step > s ? <Check size={12} /> : s}
             </div>
             <span style={{ fontSize: 11, fontWeight: step === s ? 700 : 400, color: step === s ? "#1C1917" : "#9CA3AF", letterSpacing: "0.06em", textTransform: "uppercase" as const }}>
-              {s === 1 ? "Account" : "Salon Info"}
+              {s === 1 ? stepOneLabel : stepTwoLabel}
             </span>
           </div>
           {i === 0 && <div style={{ flex: 1, height: 1.5, margin: "0 12px", background: step > 1 ? COLORS.accent : "#E5E7EB", transition: "background 0.4s", minWidth: 24 }} />}
         </React.Fragment>
       ))}
     </div>
-  );
-}
-
-function AppSelect({ options, placeholder, value, onChange, disabled }: { options: string[]; placeholder: string; value?: string; onChange?: (val: string) => void; disabled?: boolean }) {
-  return (
-    <select value={value} onChange={(e) => onChange?.(e.target.value)} disabled={disabled}
-      style={{ width: "100%", height: 44, borderRadius: 10, border: "1.5px solid #E5E7EB", background: "#FAFAF9", padding: "0 36px 0 13px", fontSize: 14, color: "#1C1917", cursor: "pointer", outline: "none", appearance: "none" as const, backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='11' height='11' viewBox='0 0 24 24' fill='none' stroke='%239CA3AF' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E")`, backgroundRepeat: "no-repeat", backgroundPosition: "right 13px center", boxSizing: "border-box" }}>
-      <option value="">{placeholder}</option>
-      {options.map((o) => <option key={o} value={o}>{o}</option>)}
-    </select>
   );
 }
 
@@ -187,6 +178,7 @@ const RIGHT_COPY: Record<Screen, { quote: string; sub: string }> = {
 };
 
 export default function SignupPage() {
+  const { t } = useLocale();
   const router = useRouter();
   const { setUser } = useAuthStore();
   const [screen, setScreen] = useState<Screen>("select");
@@ -531,7 +523,7 @@ export default function SignupPage() {
             <div style={{ display: "flex", alignItems: "center", gap: 9 }}>
               <Image src="/images/website-logo.png" alt="Nouryx" width={120} height={28} className="h-7 w-auto" />
             </div>
-            <NavBack label={screen !== "select" ? "Back" : "Home"} onClick={onBack} />
+            <NavBack label={screen !== "select" ? t.common.back : t.nav.home} onClick={onBack} />
           </div>
 
           <div style={{ flex: 1, overflow: "hidden", position: "relative", width: "100%" }}>
@@ -539,13 +531,13 @@ export default function SignupPage() {
             {/* SELECT */}
             <div className="select-panel" style={{ transform: screen === "select" ? "translateX(0)" : "translateX(-100%)", opacity: screen === "select" ? 1 : 0, transition: "transform 0.45s cubic-bezier(.77,0,.18,1), opacity 0.3s ease", pointerEvents: screen === "select" ? "auto" : "none" }}>
               <div style={{ width: "100%", maxWidth: 420 }}>
-                <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.16em", textTransform: "uppercase" as const, color: COLORS.accent, marginBottom: 10 }}>Welcome to Nouryx</p>
-                <h1 style={{ fontSize: 36, fontWeight: 600, color: "#1C1917", lineHeight: 1.18, marginBottom: 6 }}>Sign up</h1>
-                <p style={{ color: "#A8A29E", fontSize: 15.5, marginBottom: 36, fontWeight: 300 }}>Choose how you&apos;d like to continue.</p>
+                <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.16em", textTransform: "uppercase" as const, color: COLORS.accent, marginBottom: 10 }}>{t.auth.signup.subtitle}</p>
+                <h1 style={{ fontSize: 36, fontWeight: 600, color: "#1C1917", lineHeight: 1.18, marginBottom: 6 }}>{t.nav.signup}</h1>
+                <p style={{ color: "#A8A29E", fontSize: 15.5, marginBottom: 36, fontWeight: 300 }}>{t.auth.signup.title}</p>
                 <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
                   {([
-                    { key: "client" as Screen, title: "For Customers", sub: "Book salons and spas near you", symbol: "✦" },
-                    { key: "salon" as Screen, title: "For Professionals", sub: "Manage and grow your business", symbol: "◈" },
+                    { key: "client" as Screen, title: t.auth.signup.tabClient, sub: t.booking.viewBookings, symbol: "✦" },
+                    { key: "salon" as Screen, title: t.auth.signup.tabSalon, sub: t.nav.listBusiness, symbol: "◈" },
                   ]).map(({ key, title, sub, symbol }) => (
                     <button key={key} className="role-card" onClick={() => goTo(key)}
                       style={{ display: "flex", alignItems: "center", gap: 14, padding: "16px 18px", borderRadius: 12, border: "1.5px solid #E5E7EB", background: "#fff", cursor: "pointer", textAlign: "left", boxShadow: "0 1px 4px rgba(0,0,0,0.04)", width: "100%" }}>
@@ -559,10 +551,10 @@ export default function SignupPage() {
                   ))}
                 </div>
                 <p style={{ marginTop: 28, fontSize: 13.5, color: "#A8A29E", textAlign: "center" }}>
-                  Already have an account?{" "}<Link href="/login" style={{ color: COLORS.accent, fontWeight: 600, textDecoration: "none" }}>Sign in</Link>
+                  {t.auth.signup.haveAccount}{" "}<Link href="/login" style={{ color: COLORS.accent, fontWeight: 600, textDecoration: "none" }}>{t.auth.signup.loginLink}</Link>
                 </p>
                 <div style={{ marginTop: 36, display: "flex", gap: 20, justifyContent: "center" }}>
-                  <button style={{ display: "flex", alignItems: "center", gap: 5, background: "none", border: "none", cursor: "pointer", color: "#A8A29E", fontSize: 12, padding: 0 }}><Globe size={12} /> Help &amp; Support</button>
+                  <button style={{ display: "flex", alignItems: "center", gap: 5, background: "none", border: "none", cursor: "pointer", color: "#A8A29E", fontSize: 12, padding: 0 }}><Globe size={12} /> {t.footer.about.links[2]}</button>
                 </div>
               </div>
             </div>
@@ -570,57 +562,57 @@ export default function SignupPage() {
             {/* CLIENT FORM */}
             <Panel active={screen === "client"}>
               <div style={{ marginBottom: 22 }}>
-                <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.15em", color: COLORS.accent, textTransform: "uppercase" as const, marginBottom: 7 }}>Customer Account</p>
-                <h2 style={{ fontSize: 28, fontWeight: 600, color: "#1C1917", lineHeight: 1.2 }}>Create your profile</h2>
+                <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.15em", color: COLORS.accent, textTransform: "uppercase" as const, marginBottom: 7 }}>{t.auth.signup.tabClient}</p>
+                <h2 style={{ fontSize: 28, fontWeight: 600, color: "#1C1917", lineHeight: 1.2 }}>{t.auth.signup.title}</h2>
               </div>
               {error && screen === "client" && <div style={{ padding: "10px 14px", borderRadius: 8, background: "#FEF2F2", border: "1px solid #FECACA", color: "#DC2626", fontSize: 13, marginBottom: 12, fontWeight: 500 }}>{error}</div>}
               <form style={{ display: "flex", flexDirection: "column", gap: 13 }} onSubmit={handleClientSignup}>
                 <div style={{ display: "flex", justifyContent: "center", marginBottom: 2 }}>
-                  <UploadZone round label="Photo" preview={clientPhotoPreview} onFileSelect={(f) => handlePhotoSelect(f, "client")} />
+                  <UploadZone round label={t.auth.signup.profileImage} preview={clientPhotoPreview} onFileSelect={(f) => handlePhotoSelect(f, "client")} />
                 </div>
-                <Field label="Full Name"><AppInput icon={User} placeholder="John Doe" value={clientName} onChange={setClientName} disabled={loading} /></Field>
-                <Field label="Email Address"><AppInput icon={Mail} type="email" placeholder="hello@example.com" value={clientEmail} onChange={setClientEmail} disabled={loading} /></Field>
-                <Field label="Phone Number"><AppInput icon={Phone} type="tel" placeholder="+33 6 12 34 56 78" value={clientPhone} onChange={setClientPhone} disabled={loading} /></Field>
-                <Field label="Password"><AppInput icon={Lock} type={showPw ? "text" : "password"} placeholder="••••••••" rightIcon={showPw ? <EyeOff size={14} /> : <EyeIcon size={14} />} onRightIcon={() => setShowPw((p) => !p)} value={clientPassword} onChange={setClientPassword} disabled={loading} /></Field>
-                <Field label="Confirm Password"><AppInput icon={Lock} type="password" placeholder="••••••••" value={clientConfirmPw} onChange={setClientConfirmPw} disabled={loading} /></Field>
+                <Field label={t.auth.signup.fullName}><AppInput icon={User} placeholder="John Doe" value={clientName} onChange={setClientName} disabled={loading} /></Field>
+                <Field label={t.auth.signup.email}><AppInput icon={Mail} type="email" placeholder="hello@example.com" value={clientEmail} onChange={setClientEmail} disabled={loading} /></Field>
+                <Field label={t.auth.signup.phone}><AppInput icon={Phone} type="tel" placeholder="+33 6 12 34 56 78" value={clientPhone} onChange={setClientPhone} disabled={loading} /></Field>
+                <Field label={t.auth.signup.password}><AppInput icon={Lock} type={showPw ? "text" : "password"} placeholder="••••••••" rightIcon={showPw ? <EyeOff size={14} /> : <EyeIcon size={14} />} onRightIcon={() => setShowPw((p) => !p)} value={clientPassword} onChange={setClientPassword} disabled={loading} /></Field>
+                <Field label={t.auth.signup.confirmPassword}><AppInput icon={Lock} type="password" placeholder="••••••••" value={clientConfirmPw} onChange={setClientConfirmPw} disabled={loading} /></Field>
                 <label style={{ display: "flex", alignItems: "flex-start", gap: 9, cursor: "pointer", marginTop: 2 }} onClick={() => setClientAgree(p => !p)}>
                   <div style={{ width: 17, height: 17, borderRadius: 5, border: `1.5px solid ${COLORS.accent}`, flexShrink: 0, marginTop: 1, background: clientAgree ? COLORS.accent : "#fff", display: "flex", alignItems: "center", justifyContent: "center" }}>
                     {clientAgree && <Check size={10} style={{ color: "#fff" }} />}
                   </div>
-                  <span style={{ fontSize: 13, color: "#78716C" }}>I agree to the <Link href="#" style={{ color: COLORS.accent, fontWeight: 600, textDecoration: "none" }}>Terms &amp; Conditions</Link> and <Link href="#" style={{ color: COLORS.accent, fontWeight: 600, textDecoration: "none" }}>Privacy Policy</Link></span>
+                  <span style={{ fontSize: 13, color: "#78716C" }}>{t.auth.signup.agreeTerms} <Link href="#" style={{ color: COLORS.accent, fontWeight: 600, textDecoration: "none" }}>{t.auth.signup.termsLink}</Link></span>
                 </label>
-                <PrimaryButton type="submit" style={{ marginTop: 2 }} disabled={loading}>{loading ? <><Spinner /> CREATING...</> : <>CREATE ACCOUNT <ArrowRight size={13} /></>}</PrimaryButton>
+                <PrimaryButton type="submit" style={{ marginTop: 2 }} disabled={loading}>{loading ? <><Spinner /> {t.common.loading}</> : <>{t.auth.signup.cta.toUpperCase()} <ArrowRight size={13} /></>}</PrimaryButton>
               </form>
-              <p style={{ marginTop: 18, textAlign: "center", fontSize: 13.5, color: "#A8A29E" }}>Already have an account? <Link href="/login" style={{ fontWeight: 600, color: COLORS.accent, textDecoration: "none" }}>Sign in</Link></p>
+              <p style={{ marginTop: 18, textAlign: "center", fontSize: 13.5, color: "#A8A29E" }}>{t.auth.signup.haveAccount} <Link href="/login" style={{ fontWeight: 600, color: COLORS.accent, textDecoration: "none" }}>{t.auth.signup.loginLink}</Link></p>
             </Panel>
 
             {/* SALON FORM */}
             <Panel active={screen === "salon"}>
               <div style={{ marginBottom: 18 }}>
-                <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.15em", color: COLORS.accent, textTransform: "uppercase" as const, marginBottom: 7 }}>Professional Account</p>
-                <h2 style={{ fontSize: 28, fontWeight: 600, color: "#1C1917", lineHeight: 1.2 }}>Register your salon</h2>
+                <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.15em", color: COLORS.accent, textTransform: "uppercase" as const, marginBottom: 7 }}>{t.auth.signup.tabSalon}</p>
+                <h2 style={{ fontSize: 28, fontWeight: 600, color: "#1C1917", lineHeight: 1.2 }}>{t.auth.signup.shopName}</h2>
               </div>
-              <StepIndicator step={salonStep} />
+              <StepIndicator step={salonStep} stepOneLabel={t.auth.signup.step1} stepTwoLabel={t.auth.signup.step2} />
               {error && screen === "salon" && <div style={{ padding: "10px 14px", borderRadius: 8, background: "#FEF2F2", border: "1px solid #FECACA", color: "#DC2626", fontSize: 13, marginTop: 12, marginBottom: 4, fontWeight: 500 }}>{error}</div>}
 
               {salonStep === 1 && (
                 <form style={{ display: "flex", flexDirection: "column", gap: 12, marginTop: 18 }} onSubmit={handleSalonStep1Submit}>
                   <div style={{ display: "flex", justifyContent: "center", marginBottom: 2 }}>
-                    <UploadZone Icon={Building} label="Logo" preview={salonLogoPreview} onFileSelect={(f) => handlePhotoSelect(f, "salon")} />
+                    <UploadZone Icon={Building} label={t.auth.signup.shopLogo} preview={salonLogoPreview} onFileSelect={(f) => handlePhotoSelect(f, "salon")} />
                   </div>
-                  <Field label="Salon Name"><AppInput placeholder="Élégance Coiffure" value={salonName} onChange={setSalonName} disabled={loading} /></Field>
-                  <Field label="Owner Name"><AppInput icon={User} placeholder="Marie Dupont" value={ownerName} onChange={setOwnerName} disabled={loading} /></Field>
-                  <Field label="Email Address"><AppInput icon={Mail} type="email" placeholder="salon@example.com" value={salonEmail} onChange={setSalonEmail} disabled={loading} /></Field>
-                  <Field label="Phone Number"><AppInput icon={Phone} type="tel" placeholder="+33 6 12 34 56 78" value={salonPhone} onChange={setSalonPhone} disabled={loading} /></Field>
-                  <Field label="Password"><AppInput icon={Lock} type={showPw ? "text" : "password"} placeholder="••••••••" rightIcon={showPw ? <EyeOff size={14} /> : <EyeIcon size={14} />} onRightIcon={() => setShowPw((p) => !p)} value={salonPassword} onChange={setSalonPassword} disabled={loading} /></Field>
-                  <Field label="Confirm Password"><AppInput icon={Lock} type="password" placeholder="••••••••" value={salonConfirmPw} onChange={setSalonConfirmPw} disabled={loading} /></Field>
-                  <PrimaryButton type="submit" style={{ marginTop: 2 }} disabled={loading}>{loading ? <><Spinner /> VALIDATING...</> : <>CONTINUE <ArrowRight size={13} /></>}</PrimaryButton>
+                  <Field label={t.auth.signup.shopName}><AppInput placeholder="Elegance Coiffure" value={salonName} onChange={setSalonName} disabled={loading} /></Field>
+                  <Field label={t.auth.signup.ownerName}><AppInput icon={User} placeholder="Marie Dupont" value={ownerName} onChange={setOwnerName} disabled={loading} /></Field>
+                  <Field label={t.auth.signup.email}><AppInput icon={Mail} type="email" placeholder="salon@example.com" value={salonEmail} onChange={setSalonEmail} disabled={loading} /></Field>
+                  <Field label={t.auth.signup.phone}><AppInput icon={Phone} type="tel" placeholder="+33 6 12 34 56 78" value={salonPhone} onChange={setSalonPhone} disabled={loading} /></Field>
+                  <Field label={t.auth.signup.password}><AppInput icon={Lock} type={showPw ? "text" : "password"} placeholder="••••••••" rightIcon={showPw ? <EyeOff size={14} /> : <EyeIcon size={14} />} onRightIcon={() => setShowPw((p) => !p)} value={salonPassword} onChange={setSalonPassword} disabled={loading} /></Field>
+                  <Field label={t.auth.signup.confirmPassword}><AppInput icon={Lock} type="password" placeholder="••••••••" value={salonConfirmPw} onChange={setSalonConfirmPw} disabled={loading} /></Field>
+                  <PrimaryButton type="submit" style={{ marginTop: 2 }} disabled={loading}>{loading ? <><Spinner /> {t.common.loading}</> : <>{t.auth.signup.next.toUpperCase()} <ArrowRight size={13} /></>}</PrimaryButton>
                 </form>
               )}
 
               {salonStep === 2 && (
                 <form style={{ display: "flex", flexDirection: "column", gap: 12, marginTop: 18 }} onSubmit={handleSalonSubmit}>
-                  <Field label="Salon Address">
+                  <Field label={t.auth.signup.location}>
                     <div style={{ position: "relative" }}>
                       <AppInput icon={MapPin} placeholder="12 Rue de Rivoli, Paris" value={salonAddress} onChange={handleAddressSearch} disabled={loading} onKeyDown={handleAddressKeyDown} />
                       {addressSuggestions.length > 0 && (
@@ -638,7 +630,7 @@ export default function SignupPage() {
                     </div>
                   </Field>
                   <div>
-                    <FieldLabel>Shop Photos</FieldLabel>
+                    <FieldLabel>{t.auth.signup.shopImages}</FieldLabel>
                     <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 8 }}>
                       {[0, 1, 2, 3].map((i) => (
                         <label key={i} style={{ cursor: "pointer" }}>
@@ -651,7 +643,7 @@ export default function SignupPage() {
                     </div>
                   </div>
                   <div>
-                    <Field label="Company Registration Number"><AppInput placeholder="123 456 789" value={siretNumber} onChange={setSiretNumber} disabled={loading} /></Field>
+                    <Field label={t.auth.signup.siretNumber}><AppInput placeholder="123 456 789" value={siretNumber} onChange={setSiretNumber} disabled={loading} /></Field>
                     <div style={{ marginTop: 8, padding: "10px 12px", background: "#F5F5F4", border: "1px solid #E5E7EB", borderRadius: 8, fontSize: 11.5, color: "#57534E", lineHeight: 1.5 }}>
                       <div style={{ display: "grid", gridTemplateColumns: "1fr", gap: 3 }}>
                         <span>🇫🇷 <strong>France</strong> &rarr; SIRET number</span>
@@ -661,18 +653,25 @@ export default function SignupPage() {
                       </div>
                     </div>
                   </div>
-                  <Field label="Legal Status"><AppSelect options={["SAS", "SARL", "EURL", "Auto-entrepreneur", "SA"]} placeholder="Select status..." value={legalStatus} onChange={setLegalStatus} disabled={loading} /></Field>
+                  <Field label={t.auth.signup.legalStatus}>
+                    <AppInput
+                      placeholder={t.auth.signup.legalStatus}
+                      value={legalStatus}
+                      onChange={setLegalStatus}
+                      disabled={loading}
+                    />
+                  </Field>
                   <div>
-                    <FieldLabel>Description</FieldLabel>
-                    <textarea placeholder="Tell clients about your salon..." rows={3} value={salonDescription} onChange={(e) => setSalonDescription(e.target.value)} disabled={loading}
+                    <FieldLabel>{t.auth.signup.description}</FieldLabel>
+                    <textarea placeholder={t.auth.signup.description} rows={3} value={salonDescription} onChange={(e) => setSalonDescription(e.target.value)} disabled={loading}
                       style={{ width: "100%", borderRadius: 10, border: "1.5px solid #E5E7EB", background: "#FAFAF9", padding: "11px 13px", fontSize: 14, color: "#1C1917", outline: "none", boxSizing: "border-box" }}
                       onFocus={(e) => { e.currentTarget.style.borderColor = COLORS.accent; e.currentTarget.style.boxShadow = `0 0 0 3px ${COLORS.accentLight}`; }}
                       onBlur={(e) => { e.currentTarget.style.borderColor = "#E5E7EB"; e.currentTarget.style.boxShadow = "none"; }} />
                   </div>
                   <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "2px 0" }}>
                     <div>
-                      <div style={{ fontSize: 12, fontWeight: 600, color: "#1C1917" }}>Auto-accept bookings</div>
-                      <div style={{ fontSize: 11.5, color: "#A8A29E", marginTop: 1 }}>Confirm appointments automatically</div>
+                      <div style={{ fontSize: 12, fontWeight: 600, color: "#1C1917" }}>{t.auth.signup.autoAccept}</div>
+                      <div style={{ fontSize: 11.5, color: "#A8A29E", marginTop: 1 }}>{t.dashboard.bookings.accept}</div>
                     </div>
                     <div role="switch" aria-checked={autoAccept} onClick={() => setAutoAccept((a) => !a)}
                       style={{ width: 42, height: 23, borderRadius: 12, background: autoAccept ? COLORS.accent : "#E5E7EB", position: "relative", cursor: "pointer", transition: "background 0.25s", flexShrink: 0 }}>
@@ -683,16 +682,16 @@ export default function SignupPage() {
                     <div style={{ width: 17, height: 17, borderRadius: 5, border: `1.5px solid ${COLORS.accent}`, flexShrink: 0, marginTop: 1, background: salonAgree ? COLORS.accent : "#fff", display: "flex", alignItems: "center", justifyContent: "center" }}>
                       {salonAgree && <Check size={10} style={{ color: "#fff" }} />}
                     </div>
-                    <span style={{ fontSize: 13, color: "#78716C" }}>I agree to the <Link href="#" style={{ color: COLORS.accent, fontWeight: 600, textDecoration: "none" }}>Terms &amp; Conditions</Link></span>
+                    <span style={{ fontSize: 13, color: "#78716C" }}>{t.auth.signup.agreeTerms} <Link href="#" style={{ color: COLORS.accent, fontWeight: 600, textDecoration: "none" }}>{t.auth.signup.termsLink}</Link></span>
                   </label>
                   <div style={{ display: "flex", gap: 9, marginTop: 2 }}>
-                    <OutlineButton onClick={() => setSalonStep(1)} disabled={loading}><ArrowLeft size={13} /> BACK</OutlineButton>
-                    <PrimaryButton type="submit" style={{ flex: 1 }} disabled={loading}>{loading ? <><Spinner /> REGISTERING...</> : "REGISTER SALON"}</PrimaryButton>
+                    <OutlineButton onClick={() => setSalonStep(1)} disabled={loading}><ArrowLeft size={13} /> {t.auth.signup.back.toUpperCase()}</OutlineButton>
+                    <PrimaryButton type="submit" style={{ flex: 1 }} disabled={loading}>{loading ? <><Spinner /> {t.common.loading}</> : t.nav.listBusiness.toUpperCase()}</PrimaryButton>
                   </div>
                 </form>
               )}
 
-              <p style={{ marginTop: 18, textAlign: "center", fontSize: 13.5, color: "#A8A29E" }}>Already registered? <Link href="/login" style={{ fontWeight: 600, color: COLORS.accent, textDecoration: "none" }}>Sign in</Link></p>
+              <p style={{ marginTop: 18, textAlign: "center", fontSize: 13.5, color: "#A8A29E" }}>{t.auth.signup.haveAccount} <Link href="/login" style={{ fontWeight: 600, color: COLORS.accent, textDecoration: "none" }}>{t.auth.signup.loginLink}</Link></p>
             </Panel>
           </div>
         </div>

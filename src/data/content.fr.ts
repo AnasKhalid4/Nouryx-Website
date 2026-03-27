@@ -233,7 +233,7 @@ export const content = {
     },
     story: {
       title: "Notre Histoire",
-      text: "Fondé avec une idée simple — rendre les services beauté accessibles à tous — Nouryx est devenu une plateforme de confiance connectant des milliers de clients avec des centaines de salons à travers la France. Notre mission est de simplifier l'expérience de réservation tout en donnant aux propriétaires de salons des outils puissants.",
+      text: "Fondé avec une idée simple — rendre les services beauté accessibles à tous — Nouryx est devenu une plateforme de confiance connectant des milliers de clients avec des centaines de salons à travers le monde  . Notre mission est de simplifier l'expérience de réservation tout en donnant aux propriétaires de salons des outils puissants.",
     },
   },
 
@@ -256,7 +256,7 @@ export const content = {
       title: "Coordonnées",
       email: "support@nouryx.com",
       phone: "+33 1 23 45 67 89",
-      address: "123 Avenue des Champs-Élysées, 75008 Paris, France",
+      address: "18 rue Fleming, 59139 Wattignies",
     },
   },
 

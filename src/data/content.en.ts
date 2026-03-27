@@ -256,7 +256,7 @@ export const content = {
       title: "Contact Information",
       email: "support@nouryx.com",
       phone: "+33 1 23 45 67 89",
-      address: "123 Avenue des Champs-Élysées, 75008 Paris, France",
+      address: "18 rue Fleming, 59139 Wattignies",
     },
   },
 

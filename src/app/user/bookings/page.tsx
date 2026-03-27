@@ -5,7 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
-import { CalendarDays, Clock, MapPin, Star, Eye, Loader2, X } from "lucide-react";
+import { CalendarDays, Clock, MapPin, Star, Eye, Loader2, X, User } from "lucide-react";
 import { useLocale } from "@/hooks/use-locale";
 import { useUserBookings, useCancelBooking } from "@/hooks/use-bookings";
 import { useSubmitReview } from "@/hooks/use-reviews";
@@ -49,6 +49,12 @@ function BookingCard({ booking, t, onCancel, onReview }: { booking: BookingModel
           <div className="flex items-center gap-1.5 mt-1 text-muted-foreground">
             <MapPin className="h-3 w-3" />
             <span className="text-xs">{booking.salon?.city || ""}</span>
+          </div>
+          <div className="flex items-center gap-1.5 mt-1 text-muted-foreground">
+            <User className="h-3 w-3" />
+            <span className="text-xs">
+              {t.booking.specialist}: {booking.team_member?.name || t.common.noResults}
+            </span>
           </div>
           <div className="flex items-center gap-3 mt-1.5 text-xs text-muted-foreground">
             <span className="flex items-center gap-1">
@@ -112,7 +118,7 @@ export default function BookingsPage() {
   // --- All useState hooks BEFORE any conditional returns (Rules of Hooks) ---
   const [bookingToCancel, setBookingToCancel] = useState<BookingModel | null>(null);
   const [selectedReason, setSelectedReason] = useState<string>("");
-  const [cancelReason, setCancelReason] = useState("");
+  const [customReason, setCustomReason] = useState("");
   const [isCancelling, setIsCancelling] = useState(false);
 
   // Review state
@@ -130,16 +136,7 @@ export default function BookingsPage() {
     return null;
   }
 
-  const predefinedReasons = [
-    "Schedule conflict",
-    "Found a better deal",
-    "Changed my mind",
-    "Booked elsewhere",
-    "Salon is too far",
-    "Wait time too long",
-    "Personal emergency",
-    "Other"
-  ];
+  const predefinedReasons = t.userBookings.cancelReasons;
 
   const inprocess = bookings?.filter((b) => b.status === "inprocess" || b.status === "pending") || [];
   const completed = bookings?.filter((b) => b.status === "completed") || [];
@@ -148,7 +145,7 @@ export default function BookingsPage() {
   const handleCancelClick = (booking: BookingModel) => {
     setBookingToCancel(booking);
     setSelectedReason("");
-    setCancelReason("");
+    setCustomReason("");
   };
 
   const handleReviewClick = (booking: BookingModel) => {
@@ -182,7 +179,13 @@ export default function BookingsPage() {
   const confirmCancel = () => {
     if (!bookingToCancel) return;
 
-    const finalReason = selectedReason === "Other" ? cancelReason.trim() : selectedReason;
+    const trimmedCustomReason = customReason.trim();
+    const isOtherReason = selectedReason === t.userBookings.cancelReasons[t.userBookings.cancelReasons.length - 1];
+    const finalReason = isOtherReason
+      ? trimmedCustomReason
+      : trimmedCustomReason
+        ? `${selectedReason} - ${trimmedCustomReason}`
+        : selectedReason;
     if (!finalReason) {
       toast.error("Please provide a cancellation reason");
       return;
@@ -349,16 +352,28 @@ export default function BookingsPage() {
       <Dialog open={!!bookingToCancel} onOpenChange={(open) => !open && setBookingToCancel(null)}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>Cancel Booking</DialogTitle>
+            <DialogTitle>{t.userBookings.cancelTitle}</DialogTitle>
           </DialogHeader>
           <div className="py-2">
             <p className="text-sm text-muted-foreground mb-4">
-              Please select a reason for cancelling this booking at <span className="font-semibold text-foreground">{bookingToCancel?.salon?.shopName || "the salon"}</span>.
+              {t.userBookings.cancelSubtitle} <span className="font-semibold text-foreground">{bookingToCancel?.salon?.shopName || "Salon"}</span>.
             </p>
 
             <div className="space-y-3 mb-4">
               {predefinedReasons.map((reason) => (
-                <label key={reason} className="flex items-center gap-3 cursor-pointer group">
+                <label
+                  key={reason}
+                  className="flex items-center gap-3 cursor-pointer group"
+                  onClick={() => setSelectedReason(reason)}
+                >
+                  <input
+                    type="radio"
+                    name="cancel-reason"
+                    value={reason}
+                    checked={selectedReason === reason}
+                    onChange={() => setSelectedReason(reason)}
+                    className="sr-only"
+                  />
                   <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-colors ${selectedReason === reason ? 'border-[#C9AA8B]' : 'border-border group-hover:border-border/80'}`}>
                     {selectedReason === reason && <div className="w-2.5 h-2.5 rounded-full bg-[#C9AA8B]" />}
                   </div>
@@ -367,27 +382,27 @@ export default function BookingsPage() {
               ))}
             </div>
 
-            {selectedReason === "Other" && (
+            {selectedReason === t.userBookings.cancelReasons[t.userBookings.cancelReasons.length - 1] && (
               <Textarea
-                placeholder="Please type your reason here..."
-                value={cancelReason}
-                onChange={(e) => setCancelReason(e.target.value)}
+                placeholder={t.userBookings.otherReason}
+                value={customReason}
+                onChange={(e) => setCustomReason(e.target.value)}
                 className="resize-none mt-2"
                 rows={3}
               />
             )}
           </div>
           <DialogFooter className="gap-2 sm:gap-0 mt-2">
-            <Button variant="outline" onClick={() => setBookingToCancel(null)} disabled={isCancelling}>
-              Keep Booking
+            <Button variant="outline" onClick={() => setBookingToCancel(null)} disabled={isCancelling} className="mx-3">
+              {t.common.cancel}
             </Button>
             <Button
               variant="destructive"
               onClick={confirmCancel}
-              disabled={isCancelling || !selectedReason || (selectedReason === "Other" && !cancelReason.trim())}
+              disabled={isCancelling || !selectedReason || (selectedReason === t.userBookings.cancelReasons[t.userBookings.cancelReasons.length - 1] && !customReason.trim())}
             >
               {isCancelling && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Confirm Cancellation
+              {t.userBookings.cancelConfirm}
             </Button>
           </DialogFooter>
         </DialogContent>

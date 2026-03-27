@@ -230,10 +230,10 @@ export default function ContactPage() {
                     <div className="max-w-2xl mx-auto">
                         <div className="text-center mb-16">
                             <h2 className="font-serif text-4xl text-[#2c1a0e] mb-3 font-bold">
-                                Send us a Message
+                                {t.contact.getInTouch}
                             </h2>
                             <p className="text-muted-foreground text-[15px] max-w-xl mx-auto">
-                                Whether you're a client looking for the perfect salon, or a business aiming to grow, we're here to help.
+                                {t.contact.subtitle}
                             </p>
                         </div>
 
@@ -265,7 +265,7 @@ export default function ContactPage() {
                                     required
                                     type="email"
                                     name="email"
-                                    placeholder={"Email *"}
+                                    placeholder={t.contact.form.email + " *"}
                                     value={formData.email}
                                     onChange={handleChange}
                                     className="w-full h-14 border-b border-[#CBD5E1] bg-transparent px-2 text-[15px] outline-none focus:border-[#C9AA8B] transition-colors placeholder:text-[#94A3B8] text-[#2c1a0e]"
@@ -276,7 +276,7 @@ export default function ContactPage() {
                                     required
                                     type="tel"
                                     name="subject"
-                                    placeholder={"Phone Number *"}
+                                    placeholder={t.contact.form.subject + " *"}
                                     value={formData.subject}
                                     onChange={handleChange}
                                     className="w-full h-14 border-b border-[#CBD5E1] bg-transparent px-2 text-[15px] outline-none focus:border-[#C9AA8B] transition-colors placeholder:text-[#94A3B8] text-[#2c1a0e]"
@@ -300,7 +300,7 @@ export default function ContactPage() {
                                     disabled={status === "loading"}
                                     className="w-full h-14 bg-[#C9AA8B] hover:bg-[#B8956F] text-white rounded-none text-sm font-bold tracking-[0.15em] uppercase transition-all"
                                 >
-                                    {status === "loading" ? t.common.loading : "SUBMIT NOW"}
+                                    {status === "loading" ? t.common.loading : t.contact.form.send}
                                 </Button>
                             </div>
                         </form>
@@ -310,8 +310,8 @@ export default function ContactPage() {
                 {/* Full Width Map Section Below Form */}
                 <section className="w-full h-[60vh] min-h-[400px] bg-[#f5f0eb]">
                     <iframe
-                        title="Nouryx Headquarter Location"
-                        src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2624.2255883256087!2d2.299522176508006!3d48.87295870034607!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x47e66fddfe2c7ba9%3A0xe5a3cff9c513e9ec!2s123%20Av.%20des%20Champs-%C3%89lys%C3%A9es%2C%2075008%20Paris%2C%20France!5e0!3m2!1sen!2sus!4v1709123456789!5m2!1sen!2sus"
+                        title={t.contact.info.address}
+                        src="https://www.google.com/maps?q=18+rue+Fleming,+59139+Wattignies&output=embed"
                         width="100%"
                         height="100%"
                         style={{ border: 0 }}

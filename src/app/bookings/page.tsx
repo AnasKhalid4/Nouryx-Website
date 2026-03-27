@@ -157,16 +157,7 @@ export default function BookingsPage() {
 
 
 
-  const predefinedReasons = [
-    "Schedule conflict",
-    "Found a better deal",
-    "Changed my mind",
-    "Booked elsewhere",
-    "Salon is too far",
-    "Wait time too long",
-    "Personal emergency",
-    "Other",
-  ];
+  const predefinedReasons = t.userBookings.cancelReasons;
 
   const inprocess = bookings?.filter((b) => b.status === "inprocess" || b.status === "pending") || [];
   const completed = bookings?.filter((b) => b.status === "completed") || [];
@@ -186,7 +177,8 @@ export default function BookingsPage() {
 
   const confirmCancel = () => {
     if (!bookingToCancel) return;
-    const finalReason = selectedReason === "Other" ? cancelReason.trim() : selectedReason;
+    const isOtherReason = selectedReason === t.userBookings.cancelReasons[t.userBookings.cancelReasons.length - 1];
+    const finalReason = isOtherReason ? cancelReason.trim() : selectedReason;
     if (!finalReason) {
       toast.error("Please select a cancellation reason");
       return;
@@ -339,7 +331,7 @@ export default function BookingsPage() {
                 </label>
               ))}
             </div>
-            {selectedReason === "Other" && (
+            {selectedReason === t.userBookings.cancelReasons[t.userBookings.cancelReasons.length - 1] && (
               <Textarea
                 placeholder={t.userBookings.otherReason}
                 value={cancelReason}
@@ -359,7 +351,7 @@ export default function BookingsPage() {
               disabled={
                 isCancelling ||
                 !selectedReason ||
-                (selectedReason === "Other" && !cancelReason.trim())
+                (selectedReason === t.userBookings.cancelReasons[t.userBookings.cancelReasons.length - 1] && !cancelReason.trim())
               }
             >
               {isCancelling && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}

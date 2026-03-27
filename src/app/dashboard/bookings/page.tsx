@@ -3,6 +3,8 @@
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { Textarea } from "@/components/ui/textarea";
 import { CalendarDays, List, ChevronLeft, ChevronRight, Clock, User, Check, X, Eye, Loader2 } from "lucide-react";
 import { useLocale } from "@/hooks/use-locale";
 import { useAuth } from "@/hooks/use-auth";
@@ -43,6 +45,9 @@ export default function DashboardBookingsPage() {
   const salonName = user?.salon?.shopName || "Salon";
   const [view, setView] = useState<"calendar" | "list">("calendar");
   const [listTab, setListTab] = useState("pending");
+  const [bookingToCancel, setBookingToCancel] = useState<BookingModel | null>(null);
+  const [selectedCancelReason, setSelectedCancelReason] = useState("");
+  const [customCancelReason, setCustomCancelReason] = useState("");
 
   // Calendar date navigation
   const [calDate, setCalDate] = useState(new Date());
@@ -118,10 +123,29 @@ export default function DashboardBookingsPage() {
     );
   };
 
-  const handleCancel = (bookingId: string, userId: string) => {
+  const handleCancel = (booking: BookingModel) => {
+    setBookingToCancel(booking);
+    setSelectedCancelReason("");
+    setCustomCancelReason("");
+  };
+
+  const confirmCancel = () => {
+    if (!bookingToCancel) return;
+    const otherValue = t.dashboard.bookings.cancelReasons[t.dashboard.bookings.cancelReasons.length - 1];
+    const reason = selectedCancelReason === otherValue ? customCancelReason.trim() : selectedCancelReason;
+    if (!reason) {
+      toast.error(t.common.error);
+      return;
+    }
+
     cancelBooking.mutate(
-      { bookingId, reason: "Cancelled by salon", receiverId: userId, salonName },
-      { onSuccess: () => toast.success("Booking cancelled") }
+      { bookingId: bookingToCancel.bookingId, reason, receiverId: bookingToCancel.user.userId, salonName },
+      {
+        onSuccess: () => {
+          toast.success(t.dashboard.bookings.cancel);
+          setBookingToCancel(null);
+        }
+      }
     );
   };
 
@@ -230,6 +254,9 @@ export default function DashboardBookingsPage() {
                                 <p className={`text-[10px] ${color.text} opacity-80 truncate`}>
                                   {block.booking.services.map((s) => s.name).join(", ")}
                                 </p>
+                                <p className={`text-[10px] ${color.text} opacity-80 truncate`}>
+                                  {t.dashboard.teamMembers.title}: {block.booking.team_member?.name || t.common.noResults}
+                                </p>
                                 {block.booking.status === "pending" && (
                                   <span className="text-[9px] bg-white/50 rounded px-1 mt-0.5 inline-block font-medium">
                                     ⏳ Pending
@@ -247,8 +274,8 @@ export default function DashboardBookingsPage() {
               {/* Empty state */}
               {dayBookings.length === 0 && (
                 <div className="text-center py-16">
-                  <p className="text-muted-foreground text-sm">No bookings on this day</p>
-                  <p className="text-xs text-muted-foreground mt-1">Use the arrows to navigate to other days</p>
+                  <p className="text-muted-foreground text-sm">{t.common.noResults}</p>
+                  <p className="text-xs text-muted-foreground mt-1">{t.dashboard.bookings.today}</p>
                 </div>
               )}
             </div>
@@ -296,6 +323,10 @@ export default function DashboardBookingsPage() {
                                       {new Date(booking.schedule.startAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
                                     </span>
                                   </div>
+                                  <div className="flex items-center gap-1 mt-1 text-xs text-muted-foreground">
+                                    <User className="h-3 w-3" />
+                                    <span>{t.dashboard.teamMembers.title}: {booking.team_member?.name || t.common.noResults}</span>
+                                  </div>
                                 </div>
                                 <Badge variant="outline" className={`text-[10px] ${statusBadgeColors[booking.status]}`}>
                                   {booking.status}
@@ -321,7 +352,7 @@ export default function DashboardBookingsPage() {
                                     {t.dashboard.bookings.accept}
                                   </Button>
                                   <Button variant="outline" size="sm" className="text-xs rounded-lg h-7 gap-1 text-destructive border-destructive/30 flex-1 sm:flex-none justify-center"
-                                    onClick={() => handleCancel(booking.bookingId, booking.user.userId)} disabled={cancelBooking.isPending}>
+                                    onClick={() => handleCancel(booking)} disabled={cancelBooking.isPending}>
                                     <X className="h-3 w-3" />
                                     {t.dashboard.bookings.decline}
                                   </Button>
@@ -335,7 +366,7 @@ export default function DashboardBookingsPage() {
                                     {t.dashboard.bookings.complete}
                                   </Button>
                                   <Button variant="outline" size="sm" className="text-xs rounded-lg h-7 text-destructive border-destructive/30 flex-1 sm:flex-none justify-center"
-                                    onClick={() => handleCancel(booking.bookingId, booking.user.userId)} disabled={cancelBooking.isPending}>
+                                    onClick={() => handleCancel(booking)} disabled={cancelBooking.isPending}>
                                     {t.dashboard.bookings.cancel}
                                   </Button>
                                 </>
@@ -356,6 +387,55 @@ export default function DashboardBookingsPage() {
           )}
         </>
       )}
+
+      <Dialog open={!!bookingToCancel} onOpenChange={(open) => !open && setBookingToCancel(null)}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>{t.dashboard.bookings.cancel}</DialogTitle>
+          </DialogHeader>
+          <div className="py-2">
+            <div className="space-y-3 mb-4">
+              {t.dashboard.bookings.cancelReasons.map((reason) => (
+                <label key={reason} className="flex items-center gap-3 cursor-pointer group" onClick={() => setSelectedCancelReason(reason)}>
+                  <input
+                    type="radio"
+                    name="dashboard-cancel-reason"
+                    value={reason}
+                    checked={selectedCancelReason === reason}
+                    onChange={() => setSelectedCancelReason(reason)}
+                    className="sr-only"
+                  />
+                  <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-colors ${selectedCancelReason === reason ? "border-[#C9AA8B]" : "border-border group-hover:border-border/80"}`}>
+                    {selectedCancelReason === reason && <div className="w-2.5 h-2.5 rounded-full bg-[#C9AA8B]" />}
+                  </div>
+                  <span className={`text-sm ${selectedCancelReason === reason ? "text-foreground font-medium" : "text-muted-foreground"}`}>{reason}</span>
+                </label>
+              ))}
+            </div>
+            {selectedCancelReason === t.dashboard.bookings.cancelReasons[t.dashboard.bookings.cancelReasons.length - 1] && (
+              <Textarea
+                placeholder={t.userBookings.otherReason}
+                value={customCancelReason}
+                onChange={(e) => setCustomCancelReason(e.target.value)}
+                className="resize-none mt-2"
+                rows={3}
+              />
+            )}
+          </div>
+          <DialogFooter className="gap-2 sm:gap-0 mt-2">
+            <Button variant="outline" onClick={() => setBookingToCancel(null)} disabled={cancelBooking.isPending}>
+              {t.common.cancel}
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={confirmCancel}
+              disabled={cancelBooking.isPending || !selectedCancelReason || (selectedCancelReason === t.dashboard.bookings.cancelReasons[t.dashboard.bookings.cancelReasons.length - 1] && !customCancelReason.trim())}
+            >
+              {t.dashboard.bookings.cancel}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

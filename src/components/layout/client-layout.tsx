@@ -28,7 +28,7 @@ export function ClientLayout({ children }: { children: React.ReactNode }) {
   const { push } = useRouter();
   const unreadCount = useUnreadCount();
 
-  const userName = user?.profile?.fullName || "My Account";
+  const userName = user?.profile?.fullName || t.nav.profile;
   const userEmail = user?.profile?.email || "";
   const userImage = user?.profile?.profileImage || "";
   const userInitial = userName.charAt(0).toUpperCase();
@@ -44,7 +44,7 @@ export function ClientLayout({ children }: { children: React.ReactNode }) {
 
   const handleLogout = async () => {
     await signOutUser();
-    toast.success("Signed out");
+    toast.success(t.nav.logout);
     push("/");
   };
 

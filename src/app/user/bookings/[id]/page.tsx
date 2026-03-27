@@ -2,7 +2,7 @@
 
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { CalendarDays, Clock, MapPin, ArrowLeft, Loader2 } from "lucide-react";
+import { CalendarDays, Clock, MapPin, ArrowLeft, Loader2, User } from "lucide-react";
 import { useLocale } from "@/hooks/use-locale";
 import { useAuth } from "@/hooks/use-auth";
 import { useBooking } from "@/hooks/use-bookings";
@@ -101,6 +101,12 @@ export default function BookingDetailPage() {
                                     <span className="text-sm">{booking.salon?.address || booking.salon?.city || "Address not provided"}</span>
                                 </div>
                             </div>
+                        </div>
+                        <div className="mt-4 pt-4 border-t border-border/50 flex items-center gap-2 text-muted-foreground">
+                            <User className="h-4 w-4" />
+                            <span className="text-sm">
+                               {t.booking.specialist}: {booking.team_member?.name || t.common.noResults}
+                            </span>
                         </div>
                     </div>
 

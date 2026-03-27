@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Header } from "@/components/layout/header";
-import { LayoutDashboard, CalendarDays, User, Scissors, Settings, CreditCard, MessageSquare, Bell, Users, Clock } from "lucide-react";
+import { LayoutDashboard, CalendarDays, User, Scissors, Settings, CreditCard, MessageSquare, Bell, Users, Clock, Star } from "lucide-react";
 import { useLocale } from "@/hooks/use-locale";
 import { useAuth } from "@/hooks/use-auth";
 
@@ -12,6 +12,7 @@ const sidebarItems = [
   { icon: CalendarDays, key: "bookings" as const, href: "/dashboard/bookings" },
   { icon: User, key: "profile" as const, href: "/dashboard/profile" },
   { icon: Scissors, key: "services" as const, href: "/dashboard/services" },
+  { icon: Star, key: "reviews" as const, href: "/dashboard/reviews" },
   { icon: Users, key: "teamMembers" as const, href: "/dashboard/team-members" },
   { icon: Clock, key: "schedule" as const, href: "/dashboard/schedule" },
   { icon: MessageSquare, key: "chat" as const, href: "/chat" },
@@ -34,10 +35,11 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     bookings: t.dashboard.bookings.title,
     profile: t.dashboard.profile.title,
     services: t.dashboard.services.title,
-    teamMembers: "Team Members",
-    schedule: "Schedule",
+    reviews: t.salonDetail.reviews,
+    teamMembers: t.dashboard.teamMembers.title,
+    schedule: t.dashboard.schedule.title,
     chat: t.chat.title,
-    notifications: t.notifications?.title || "Notifications",
+    notifications: t.notifications?.title || t.nav.notifications,
     subscription: t.dashboard.subscription.title,
     settings: t.settings.title,
   };
@@ -87,7 +89,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         {/* Mobile bottom nav */}
         <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-border z-40">
           <div className="flex items-center justify-around py-2">
-            {sidebarItems.slice(0, 5).map((item) => {
+            {sidebarItems.slice(0, 6).map((item) => {
               const isActive =
                 item.href === "/dashboard"
                   ? pathname === "/dashboard"

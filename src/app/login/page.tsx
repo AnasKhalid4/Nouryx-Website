@@ -9,6 +9,7 @@ import { useAuthStore } from "@/stores/auth-store";
 import { requestNotificationPermission } from "@/lib/firebase/messaging";
 import { saveFcmToken } from "@/lib/firebase/auth";
 import { toast } from "sonner";
+import { useLocale } from "@/hooks/use-locale";
 
 const COLORS = {
   accent: "#C9AA8B",
@@ -46,6 +47,7 @@ function FieldLabel({ children }: { children: React.ReactNode }) {
 }
 
 export default function LoginPage() {
+  const { t } = useLocale();
   const router = useRouter();
   const { setUser } = useAuthStore();
   const [showPw, setShowPw] = useState(false);
@@ -61,7 +63,7 @@ export default function LoginPage() {
     setError("");
 
     if (!email.trim() || !password.trim()) {
-      setError("Please enter your email and password.");
+      setError(t.auth.login.subtitle);
       return;
     }
 
@@ -75,14 +77,14 @@ export default function LoginPage() {
 
       // 3. Block check
       if (user.isBlock === "1") {
-        setError("Your account has been blocked. Contact support.");
+        setError(t.common.error);
         setLoading(false);
         return;
       }
 
       // 4. Salon status check
       if (user.role === "salon" && user.salon?.status === "pending") {
-        setError("Your salon account is pending approval.");
+        setError(t.common.error);
         setLoading(false);
         return;
       }
@@ -95,7 +97,7 @@ export default function LoginPage() {
         if (token) saveFcmToken(firebaseUser.uid, token);
       });
 
-      toast.success("Welcome back!");
+      toast.success(t.auth.login.title);
 
       // 7. Role-based redirect
       if (user.role === "salon") {
@@ -109,16 +111,16 @@ export default function LoginPage() {
         case "auth/user-not-found":
         case "auth/wrong-password":
         case "auth/invalid-credential":
-          setError("Invalid email or password.");
+          setError(t.common.error);
           break;
         case "auth/too-many-requests":
-          setError("Too many attempts. Please try again later.");
+          setError(t.common.retry);
           break;
         case "auth/invalid-email":
-          setError("Invalid email format.");
+          setError(t.common.error);
           break;
         default:
-          setError(firebaseError.message || "Login failed. Please try again.");
+          setError(firebaseError.message || t.common.error);
       }
     } finally {
       setLoading(false);
@@ -201,15 +203,15 @@ export default function LoginPage() {
               onMouseEnter={() => setHovBack(true)}
               onMouseLeave={() => setHovBack(false)}
               style={{ display: "flex", alignItems: "center", gap: 6, background: hovBack ? "#F5F0EB" : "transparent", border: "none", cursor: "pointer", color: hovBack ? "#1C1917" : "#78716C", fontSize: 12, fontWeight: 500, letterSpacing: "0.04em", padding: "6px 10px", borderRadius: 8, transition: "all 0.2s", whiteSpace: "nowrap" }}>
-              <ArrowLeft size={13} /> Home
+              <ArrowLeft size={13} /> {t.nav.home}
             </button>
           </div>
 
           <div className="login-form-area">
             <div className="login-form-inner">
-              <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.16em", textTransform: "uppercase", color: COLORS.accent, marginBottom: 10 }}>Welcome back</p>
-              <h1 style={{ fontSize: 36, fontWeight: 600, color: "#1C1917", lineHeight: 1.18, marginBottom: 6 }}>Sign in</h1>
-              <p style={{ color: "#A8A29E", fontSize: 15, marginBottom: 32, fontWeight: 300 }}>Good to have you back. Let&apos;s get started.</p>
+              <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.16em", textTransform: "uppercase", color: COLORS.accent, marginBottom: 10 }}>{t.auth.login.title}</p>
+              <h1 style={{ fontSize: 36, fontWeight: 600, color: "#1C1917", lineHeight: 1.18, marginBottom: 6 }}>{t.auth.login.cta}</h1>
+              <p style={{ color: "#A8A29E", fontSize: 15, marginBottom: 32, fontWeight: 300 }}>{t.auth.login.subtitle}</p>
 
               {error && (
                 <div style={{ padding: "10px 14px", borderRadius: 8, background: "#FEF2F2", border: "1px solid #FECACA", color: "#DC2626", fontSize: 13, marginBottom: 16, fontWeight: 500 }}>
@@ -219,15 +221,15 @@ export default function LoginPage() {
 
               <form style={{ display: "flex", flexDirection: "column", gap: 16 }} onSubmit={handleLogin}>
                 <div>
-                  <FieldLabel>Email Address</FieldLabel>
+                  <FieldLabel>{t.auth.login.email}</FieldLabel>
                   <AppInput icon={Mail} type="email" placeholder="hello@example.com" value={email} onChange={setEmail} disabled={loading} />
                 </div>
 
                 <div>
                   <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 5 }}>
-                    <FieldLabel>Password</FieldLabel>
+                    <FieldLabel>{t.auth.login.password}</FieldLabel>
                     <Link href="/forgot-password" style={{ fontSize: 11.5, color: COLORS.accent, fontWeight: 600, textDecoration: "none", letterSpacing: "0.02em" }}>
-                      Forgot password?
+                      {t.auth.login.forgotPassword}
                     </Link>
                   </div>
                   <AppInput
@@ -244,13 +246,13 @@ export default function LoginPage() {
                   onMouseEnter={() => setHovBtn(true)}
                   onMouseLeave={() => setHovBtn(false)}
                   style={{ width: "100%", height: 48, borderRadius: 10, background: loading ? "#D6CFC9" : hovBtn ? COLORS.accentDark : COLORS.accent, color: "#fff", border: "none", cursor: loading ? "not-allowed" : "pointer", fontSize: 12, fontWeight: 700, letterSpacing: "0.1em", transition: "background 0.2s, transform 0.15s", transform: hovBtn && !loading ? "translateY(-1px)" : "none", marginTop: 4, display: "flex", alignItems: "center", justifyContent: "center", gap: 8 }}>
-                  {loading ? <><Spinner /> SIGNING IN...</> : "SIGN IN"}
+                  {loading ? <><Spinner /> {t.common.loading}</> : t.auth.login.cta.toUpperCase()}
                 </button>
               </form>
 
               <p style={{ marginTop: 28, fontSize: 13.5, color: "#A8A29E", textAlign: "center" }}>
-                Don&apos;t have an account?{" "}
-                <Link href="/signup" style={{ color: COLORS.accent, fontWeight: 600, textDecoration: "none" }}>Sign up</Link>
+                {t.auth.login.noAccount}{" "}
+                <Link href="/signup" style={{ color: COLORS.accent, fontWeight: 600, textDecoration: "none" }}>{t.auth.login.signupLink}</Link>
               </p>
             </div>
           </div>
