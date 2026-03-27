@@ -8,7 +8,7 @@ import { useState, useEffect } from "react";
 
 const valueIcons = [Lightbulb, Shield, Heart, Sparkles];
 
-// ── Maximum visible gradients ───────────────────────────────────────────
+// ── Maximum visible gradients dfdfdfdfdfdfdf ───────────────────────────────────────────
 const gradients = [
   "radial-gradient(ellipse 50% 60% at 50% -10%, rgba(201, 170, 139, 0.5), transparent), radial-gradient(ellipse 80% 60% at 0% 90%, rgba(232, 213, 192, 0.2), transparent), linear-gradient(180deg, #FEFEFE 0%, #FAF9F8 100%)",
   "radial-gradient(ellipse 50% 60% at 50% -10%, rgba(232, 213, 192, 0.5), transparent), radial-gradient(ellipse 80% 60% at 100% 90%, rgba(201, 170, 139, 0.2), transparent), linear-gradient(180deg, #FEFEFE 0%, #FBF9F7 100%)",
