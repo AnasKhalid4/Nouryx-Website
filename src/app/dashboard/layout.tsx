@@ -1,11 +1,13 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
+import { useEffect, useRef } from "react";
 import { Header } from "@/components/layout/header";
 import { LayoutDashboard, CalendarDays, User, Scissors, Settings, CreditCard, MessageSquare, Bell, Users, Clock, Star } from "lucide-react";
 import { useLocale } from "@/hooks/use-locale";
 import { useAuth } from "@/hooks/use-auth";
+import { toast } from "sonner";
 
 const sidebarItems = [
   { icon: LayoutDashboard, key: "title" as const, href: "/dashboard" },
@@ -23,8 +25,31 @@ const sidebarItems = [
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
+  const router = useRouter();
   const { t } = useLocale();
-  const { user } = useAuth();
+  const { user, isLoading } = useAuth();
+  const didRedirectRef = useRef(false);
+
+  useEffect(() => {
+    if (isLoading) return;
+
+    const isActive = user?.subscription?.active ?? false;
+    const createdAtMs = user?.createdAt?.getTime?.() ?? 0;
+    const oneYearMs = 365 * 24 * 60 * 60 * 1000;
+    const isOlderThanOneYear =
+      createdAtMs > 0 && Date.now() - createdAtMs >= oneYearMs;
+
+    const shouldGate =
+      user?.role === "salon" && !isActive && isOlderThanOneYear;
+
+    if (shouldGate && pathname !== "/dashboard/subscription") {
+      if (!didRedirectRef.current) {
+        didRedirectRef.current = true;
+        toast.error(t.dashboard.subscription.purchaseRequiredToast);
+      }
+      router.push("/dashboard/subscription");
+    }
+  }, [user, isLoading, pathname, router]);
 
   const salonName = user?.salon?.shopName || "My Salon";
   const salonCity = user?.location?.city || "";

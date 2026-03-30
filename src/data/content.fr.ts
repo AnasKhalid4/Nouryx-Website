@@ -163,12 +163,27 @@ export const content = {
     badge: "Tarifs",
     title: "Des tarifs simples et transparents",
     subtitle: "Tout ce dont vous avez besoin pour gérer votre salon. Un seul forfait, sans frais cachés.",
+    goToDashboard: "Aller au tableau de bord",
+    currentPlanBadge: "Forfait actuel",
+    freePlan: {
+      name: "Gratuit",
+      price: "0",
+      currency: "€",
+      period: "/an",
+      description: "Accès gratuit pendant la première année après la création du compte.",
+      cta: "Commencer",
+      features: [
+        "Aucune carte bancaire requise",
+        "Accès complet pendant 1 an",
+        "Passez au forfait payant après 1 an",
+      ],
+    },
     planName: "Professionnel",
     price: "29,99",
     currency: "€",
     period: "/mois",
-    trialBadge: "2 mois d'essai gratuit",
-    cta: "Commencer l'essai gratuit",
+    trialBadge: "Professionnel",
+    cta: "S'abonner",
     features: [
       "Réservations et clients illimités",
       "Gestion complète du calendrier",
@@ -184,7 +199,7 @@ export const content = {
       items: [
         {
           q: "Comment fonctionne l'essai gratuit ?",
-          a: "Vous bénéficiez de 2 mois d'accès complet gratuitement. Aucune carte bancaire requise. Après l'essai, vous serez facturé 29,99 €/mois.",
+          a: "Votre salon bénéficie d'un accès complet gratuit pendant 1 an après la création du compte. Aucune carte bancaire requise. Après 1 an, un abonnement est nécessaire pour continuer à utiliser les fonctionnalités professionnelles.",
         },
         {
           q: "Puis-je annuler à tout moment ?",
@@ -521,11 +536,14 @@ export const content = {
     subscription: {
       title: "Abonnement",
       currentPlan: "Forfait actuel",
+      freePlanLabel: "Gratuit (1 an)",
+      professionalPlanLabel: "Professionnel",
+      purchaseRequiredToast: "Veuillez acheter un abonnement pour utiliser les fonctionnalités.",
       active: "Actif",
       inactive: "Inactif",
       manage: "Gérer l'abonnement",
       upgrade: "S'abonner maintenant",
-      trialEnds: "Fin de l'essai",
+      trialEnds: "Fin de l'accès gratuit",
     },
     teamMembers: {
       title: "Membres de l'équipe",

@@ -18,8 +18,10 @@ function SubscriptionContent() {
   const router = useRouter();
 
   const isActive = user?.subscription?.active ?? false;
-  // Note: status is not in UserSubscription type, removing that check. Active + Trial logic is enough.
-  const isTrial = user?.subscription?.freeTrial?.used === true && user?.subscription?.freeTrial?.durationMonths > 0;
+  const createdAtMs = user?.createdAt?.getTime?.() ?? 0;
+  const oneYearMs = 365 * 24 * 60 * 60 * 1000;
+  const freeEndsAtMs = createdAtMs > 0 ? createdAtMs + oneYearMs : 0;
+  const isFreeYear = !isActive && createdAtMs > 0 && Date.now() < freeEndsAtMs;
 
   // Show toast on return from Stripe Checkout
   useEffect(() => {
@@ -96,16 +98,28 @@ function SubscriptionContent() {
             </div>
             <div>
               <p className="text-sm font-semibold text-foreground">{t.dashboard.subscription.currentPlan}</p>
-              <p className="text-xs text-muted-foreground">{isTrial ? "Professional (Trial)" : "Professional"}</p>
+              <p className="text-xs text-muted-foreground">
+                {isActive
+                  ? t.dashboard.subscription.professionalPlanLabel
+                  : isFreeYear
+                    ? t.dashboard.subscription.freePlanLabel
+                    : t.dashboard.subscription.professionalPlanLabel}
+              </p>
             </div>
           </div>
           <Badge
             variant="outline"
-            className={isActive ? "bg-emerald-50 text-emerald-700 border-emerald-200 self-start sm:self-auto" : "bg-red-50 text-red-700 border-red-200 self-start sm:self-auto"}
+            className={(isActive || isFreeYear) ? "bg-emerald-50 text-emerald-700 border-emerald-200 self-start sm:self-auto" : "bg-red-50 text-red-700 border-red-200 self-start sm:self-auto"}
           >
-            {isActive ? t.dashboard.subscription.active : t.dashboard.subscription.inactive}
+            {(isActive || isFreeYear) ? t.dashboard.subscription.active : t.dashboard.subscription.inactive}
           </Badge>
         </div>
+
+        {isFreeYear && freeEndsAtMs > 0 ? (
+          <p className="text-xs text-muted-foreground mb-4">
+            {t.dashboard.subscription.trialEnds}: {new Date(freeEndsAtMs).toLocaleDateString()}
+          </p>
+        ) : null}
 
         {isActive ? (
           <Button

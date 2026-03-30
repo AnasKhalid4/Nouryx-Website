@@ -163,12 +163,27 @@ export const content = {
     badge: "Preços",
     title: "Preços simples e transparentes",
     subtitle: "Tudo o que você precisa para gerenciar seu salão. Um plano, sem taxas ocultas.",
+    goToDashboard: "Ir para o painel",
+    currentPlanBadge: "Plano atual",
+    freePlan: {
+      name: "Grátis",
+      price: "0",
+      currency: "€",
+      period: "/ano",
+      description: "Acesso grátis no primeiro ano após a criação da conta.",
+      cta: "Começar",
+      features: [
+        "Sem necessidade de cartão",
+        "Acesso total por 1 ano",
+        "Faça upgrade após 1 ano",
+      ],
+    },
     planName: "Profissional",
     price: "29.99",
     currency: "€",
     period: "/mês",
-    trialBadge: "2 meses de teste grátis",
-    cta: "Iniciar Teste Grátis",
+    trialBadge: "Profissional",
+    cta: "Assinar",
     features: [
       "Agendamentos e clientes ilimitados",
       "Gestão completa do calendário",
@@ -184,7 +199,7 @@ export const content = {
       items: [
         {
           q: "Como funciona o teste grátis?",
-          a: "Você tem 2 meses de acesso completo totalmente gratuito. Não é necessário cartão de crédito para começar. Após o período de teste, será cobrado €29,99/mês.",
+          a: "O seu salão tem 1 ano de acesso completo grátis após a criação da conta. Não é necessário cartão. Após 1 ano, é necessária uma assinatura para continuar usando os recursos profissionais.",
         },
         {
           q: "Posso cancelar a qualquer momento?",
@@ -521,11 +536,14 @@ export const content = {
     subscription: {
       title: "Assinatura",
       currentPlan: "Plano Atual",
+      freePlanLabel: "Grátis (1 ano)",
+      professionalPlanLabel: "Profissional",
+      purchaseRequiredToast: "Compre uma assinatura para usar as funcionalidades.",
       active: "Ativo",
       inactive: "Inativo",
       manage: "Gerenciar Assinatura",
       upgrade: "Atualizar Agora",
-      trialEnds: "O teste termina em",
+      trialEnds: "O acesso grátis termina em",
     },
     teamMembers: {
       title: "Membros da Equipe",

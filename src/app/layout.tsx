@@ -7,6 +7,7 @@ import { LocationPrompt } from "@/components/location-prompt";
 import { QueryProvider } from "@/providers/query-provider";
 import { AuthProvider } from "@/providers/auth-provider";
 import { Toaster } from "sonner";
+import { AppDownloadPopup } from "@/components/app-download-popup";
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://nouryx.com"),
@@ -112,6 +113,7 @@ export default function RootLayout({
           <AuthProvider>
             <GlobalLoader />
             <LocationPrompt />
+            <AppDownloadPopup />
             {children}
             <Toaster richColors position="top-right" />
           </AuthProvider>

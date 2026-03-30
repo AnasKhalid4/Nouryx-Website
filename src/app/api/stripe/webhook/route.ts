@@ -69,8 +69,8 @@ export async function POST(request: NextRequest) {
                         stripe_subscription_id: subscription.id,
                         free_trial: {
                             enabled: !!subscription.trial_end,
-                            duration_months: 2,
-                            used: true,
+                            duration_months: 0,
+                            used: false,
                         },
                         purchase: {
                             started_at: (Number(subData.current_period_start ?? 0)) * 1000,

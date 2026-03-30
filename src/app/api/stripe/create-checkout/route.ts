@@ -52,14 +52,13 @@ export async function POST(request: NextRequest) {
             });
         }
 
-        // Create checkout session with 2-month free trial
+        // Create checkout session (no Stripe trial; 1-year free access is handled by account age)
         const session = await stripe.checkout.sessions.create({
             customer: customer.id,
             payment_method_types: ["card"],
             line_items: [{ price: priceId, quantity: 1 }],
             mode: "subscription",
             subscription_data: {
-                trial_period_days: 60, // 2-month free trial
                 metadata: { salonId, platform: "web" },
             },
             success_url: `${request.nextUrl.origin}/dashboard/subscription?success=true`,

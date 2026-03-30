@@ -163,12 +163,27 @@ export const content = {
     badge: "Prezzi",
     title: "Prezzi semplici e trasparenti",
     subtitle: "Tutto ciò di cui hai bisogno per gestire il tuo salone. Un piano, senza costi nascosti.",
+    goToDashboard: "Vai alla dashboard",
+    currentPlanBadge: "Piano attuale",
+    freePlan: {
+      name: "Gratis",
+      price: "0",
+      currency: "€",
+      period: "/anno",
+      description: "Accesso gratuito per il primo anno dopo la creazione dell’account.",
+      cta: "Inizia",
+      features: [
+        "Nessuna carta richiesta",
+        "Accesso completo per 1 anno",
+        "Passa al piano a pagamento dopo 1 anno",
+      ],
+    },
     planName: "Professionale",
     price: "29.99",
     currency: "€",
     period: "/mese",
-    trialBadge: "2 mesi di prova gratuita",
-    cta: "Inizia la Prova Gratuita",
+    trialBadge: "Professionale",
+    cta: "Abbonati",
     features: [
       "Prenotazioni e clienti illimitati",
       "Gestione completa del calendario",
@@ -184,7 +199,7 @@ export const content = {
       items: [
         {
           q: "Come funziona la prova gratuita?",
-          a: "Ottieni 2 mesi di accesso completo completamente gratuito. Non è necessaria la carta di credito per iniziare. Dopo la prova, ti verrà addebitato €29,99/mese.",
+          a: "Il tuo salone ottiene 1 anno di accesso completo gratuito dopo la creazione dell’account. Nessuna carta richiesta. Dopo 1 anno, è necessario un abbonamento per continuare a usare le funzionalità business.",
         },
         {
           q: "Posso cancellare in qualsiasi momento?",
@@ -521,11 +536,14 @@ export const content = {
     subscription: {
       title: "Abbonamento",
       currentPlan: "Piano Attuale",
+      freePlanLabel: "Gratis (1 anno)",
+      professionalPlanLabel: "Professionale",
+      purchaseRequiredToast: "Acquista un abbonamento per utilizzare le funzionalità.",
       active: "Attivo",
       inactive: "Inattivo",
       manage: "Gestisci Abbonamento",
       upgrade: "Aggiorna Ora",
-      trialEnds: "La prova termina il",
+      trialEnds: "L'accesso gratuito termina il",
     },
     teamMembers: {
       title: "Membri del Team",

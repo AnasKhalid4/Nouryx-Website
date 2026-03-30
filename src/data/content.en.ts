@@ -163,12 +163,27 @@ export const content = {
     badge: "Pricing",
     title: "Simple, transparent pricing",
     subtitle: "Everything you need to run your salon business. One plan, no hidden fees.",
+    goToDashboard: "Go to dashboard",
+    currentPlanBadge: "Current plan",
+    freePlan: {
+      name: "Free",
+      price: "0",
+      currency: "€",
+      period: "/year",
+      description: "Free access for the first year after account creation.",
+      cta: "Get started",
+      features: [
+        "No credit card required",
+        "Full access for 1 year",
+        "Upgrade after 1 year",
+      ],
+    },
     planName: "Professional",
     price: "29.99",
     currency: "€",
     period: "/month",
-    trialBadge: "2 months free trial",
-    cta: "Start Free Trial",
+    trialBadge: "Professional",
+    cta: "Subscribe",
     features: [
       "Unlimited bookings & clients",
       "Full calendar management",
@@ -184,7 +199,7 @@ export const content = {
       items: [
         {
           q: "How does the free trial work?",
-          a: "You get 2 months of full access completely free. No credit card required to start. After the trial, you'll be billed €29.99/month.",
+          a: "Your salon gets 1 year of full access for free after account creation. No credit card required. After 1 year, a subscription is required to continue using business features.",
         },
         {
           q: "Can I cancel anytime?",
@@ -521,11 +536,14 @@ export const content = {
     subscription: {
       title: "Subscription",
       currentPlan: "Current Plan",
+      freePlanLabel: "Free (1 year)",
+      professionalPlanLabel: "Professional",
+      purchaseRequiredToast: "Please purchase subscription to use functionalities.",
       active: "Active",
       inactive: "Inactive",
       manage: "Manage Subscription",
       upgrade: "Upgrade Now",
-      trialEnds: "Trial ends",
+      trialEnds: "Free access ends",
     },
     teamMembers: {
       title: "Team Members",
