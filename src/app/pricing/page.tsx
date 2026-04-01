@@ -20,9 +20,8 @@ export default function PricingPage() {
   const createdAtMs = user?.createdAt?.getTime?.() ?? 0;
   const oneYearMs = 365 * 24 * 60 * 60 * 1000;
   const freeEndsAtMs = createdAtMs > 0 ? createdAtMs + oneYearMs : 0;
-  const isFreeYear =
-    isSalon && !isActive && createdAtMs > 0 && Date.now() < freeEndsAtMs;
-  const showProfessionalCard = !isFreeYear;
+  const isOneYearComplete = createdAtMs > 0 && Date.now() >= freeEndsAtMs;
+  const showProfessionalCard = isSalon && isOneYearComplete;
 
   const freePlanCard = (
     <div className="bg-white rounded-2xl border border-border/50 p-8 relative overflow-hidden">
