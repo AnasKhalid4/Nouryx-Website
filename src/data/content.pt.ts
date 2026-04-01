@@ -137,6 +137,15 @@ export const content = {
     getApp: "Obter o app",
   },
 
+  appDownloadPopup: {
+    title: "Baixe o app Nouryx",
+    description:
+      "Baixe no iOS ou Android para reservar mais rápido e gerenciar seus agendamentos.",
+    getItOn: "Disponível em",
+    appStore: "App Store",
+    googlePlay: "Google Play",
+  },
+
   // Footer
   footer: {
     about: {
@@ -592,6 +601,8 @@ export const content = {
   categoriesSection: {
     title: "Nossos Últimos Serviços",
     subtitle: "por que escolher o nouryx",
+    browseServices: "Explorar serviços",
+    viewSalons: "Ver salões →",
   },
 
   // Advantages Section (home)

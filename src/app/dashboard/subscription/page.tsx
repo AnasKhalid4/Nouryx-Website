@@ -135,7 +135,7 @@ function SubscriptionContent() {
       </div>
 
       {/* Pricing Card (if not active) */}
-      {!isActive && (
+      {!isActive && !isFreeYear && (
         <div className="bg-linear-to-br from-[#F5EDE6] to-[#E8D5C0]/50 rounded-2xl p-5 md:p-6 lg:p-8 relative overflow-hidden">
           <div className="absolute top-4 right-4">
             <Badge className="bg-[#C9AA8B] text-white hover:bg-[#C9AA8B] text-[10px] md:text-xs">

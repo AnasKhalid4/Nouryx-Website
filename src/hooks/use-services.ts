@@ -11,9 +11,6 @@ import { queryKeys } from "@/lib/query-keys";
 import { useAuth } from "./use-auth";
 import type { SalonService } from "@/types/user";
 
-/**
- * Fetch services for the current salon owner
- */
 export function useMyServices() {
     const { uid, role } = useAuth();
 

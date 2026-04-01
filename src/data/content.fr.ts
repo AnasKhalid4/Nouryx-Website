@@ -137,6 +137,15 @@ export const content = {
     getApp: "Télécharger",
   },
 
+  appDownloadPopup: {
+    title: "Téléchargez l’app Nouryx",
+    description:
+      "Téléchargez sur iOS ou Android pour réserver plus vite et gérer vos rendez-vous.",
+    getItOn: "Disponible sur",
+    appStore: "App Store",
+    googlePlay: "Google Play",
+  },
+
   // Footer
   footer: {
     about: {
@@ -592,6 +601,8 @@ export const content = {
   categoriesSection: {
     title: "Nos derniers services",
     subtitle: "pourquoi choisir nouryx",
+    browseServices: "Parcourir les services",
+    viewSalons: "Voir les salons →",
   },
 
   // Advantages Section (home)

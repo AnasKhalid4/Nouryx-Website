@@ -5,6 +5,9 @@ import Image from "next/image";
 import { Facebook, Linkedin, Instagram } from "lucide-react";
 import { useLocale } from "@/hooks/use-locale";
 
+const PRIVACY_POLICY_URL = "https://admin.nouryx.com/privacy_policy.html";
+const TERMS_CONDITIONS_URL = "https://admin.nouryx.com/terms_conditions.html";
+
 const TiktokIcon = ({ className }: { className?: string }) => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
@@ -22,7 +25,7 @@ const TiktokIcon = ({ className }: { className?: string }) => (
 
 // This is the footer section and add section  and update footer logo
 const socialIcons = [
-  { name: "Instagram", icon: Instagram, href: "https://www.instagram.com/nouryx_reservation/" },
+  { name: "Instagram", icon: Instagram, href: "https://www.instagram.com/nouryx_fr?igsh=MWw1Njh4enl6NXhjbA==" },
   { name: "LinkedIn", icon: Linkedin, href: "https://www.linkedin.com/in/nouryx-reservation-18504939b" },
   { name: "Facebook", icon: Facebook, href: "https://www.facebook.com/nouryxreservation" },
   { name: "TikTok", icon: TiktokIcon, href: "https://www.tiktok.com/@nouryx_reservation?_r=1&_t=ZN-9422dJocjXL" },
@@ -50,9 +53,14 @@ export function Footer() {
     },
     {
       title: t.footer.legal.title,
-      links: t.footer.legal.links.map((label) => ({
+      links: t.footer.legal.links.map((label, i) => ({
         label,
-        href: "#",
+        href:
+          i === 0
+            ? PRIVACY_POLICY_URL
+            : i === 1
+              ? TERMS_CONDITIONS_URL
+              : TERMS_CONDITIONS_URL,
       })),
     },
   ];

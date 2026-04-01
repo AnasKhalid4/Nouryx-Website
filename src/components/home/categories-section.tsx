@@ -104,7 +104,10 @@ export default function CategoriesSection() {
                   <div
                     key={cat.id}
                     onClick={() => handleCategoryClick(cat.id)}
-                    onMouseEnter={() => setHovered(i)}
+                    onMouseEnter={() => {
+                      setHovered(i);
+                      setActive(i);
+                    }}
                     onMouseLeave={() => setHovered(null)}
                     className="relative flex-1 flex flex-col justify-end cursor-pointer"
                     style={{
@@ -118,7 +121,7 @@ export default function CategoriesSection() {
                       transition: "background 0.25s ease",
                     }}
                   >
-                    <div className="px-7 pb-9 flex flex-col gap-1.5">
+                    <div className="px-6 sm:px-7 pb-8 sm:pb-9 flex flex-col gap-1.5 items-center sm:items-start text-center sm:text-left">
                       {/* Accent line — shows when active */}
                       <div
                         style={{
@@ -134,7 +137,7 @@ export default function CategoriesSection() {
 
                       {/* Category Name */}
                       <h3
-                        className="text-white tracking-[0.18em] uppercase leading-none"
+                        className="text-white tracking-[0.18em] uppercase leading-none break-words"
                         style={{
                           fontSize: "15px",
                           fontWeight: 700,
@@ -147,7 +150,7 @@ export default function CategoriesSection() {
 
                       {/* Click hint */}
                       <p
-                        className="text-white/75 leading-snug"
+                        className="text-white/75 leading-snug break-words"
                         style={{
                           fontSize: "14.5px",
                           fontWeight: 300,
@@ -155,7 +158,9 @@ export default function CategoriesSection() {
                           transition: "opacity 0.2s ease",
                         }}
                       >
-                        {isHovered ? "View salons →" : "Browse services"}
+                        {isHovered
+                          ? t.categoriesSection.viewSalons
+                          : t.categoriesSection.browseServices}
                       </p>
                     </div>
                   </div>
